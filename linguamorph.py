@@ -19,14 +19,20 @@ parser = argparse.ArgumentParser(description="""
                      formatter_class = lambda prog:
                      argparse.HelpFormatter(prog, max_help_position=40))
 parser.add_argument('text', type=str, help='Enter a string of text')
-parser.add_argument("-c", "--convert", type=int, help="Convert text to (1) homophones (same sounds), (2) consonances (same consonants), or (3) consonant permutations", default=0)
+parser.add_argument("-mh", "--make_homophones", action='store_true', help="Make homophones (same sounds)")
+parser.add_argument("-mc", "--make_consonances", action='store_true', help="Make consonances (same consonants)")
+parser.add_argument("-mp", "--make_permutations", action='store_true', help="Make consonant permutations")
+parser.add_argument("-n", "--no_limit", action='store_true', help="Do not limit the number of syllables")
 parser.add_argument("-g", "--grammar", type=int, help="Check grammar (0=no (default), 1=once, 2=twice)", default=0)
 parser.add_argument("-s", "--save", action='store_true', help="Save output files")
 parser.add_argument("-q", "--quiet", action='store_false', help="Do not generate output on the command line")
 args = parser.parse_args()
 
 input_text = args.text
-do_convert = args.convert 
+do_homophones = args.make_homophones 
+do_consonances = args.make_consonances 
+do_permutations = args.make_permutations 
+no_limit = args.no_limit 
 do_grammar = args.grammar   
 do_save = args.save
 verbose = args.quiet
@@ -34,11 +40,11 @@ verbose = args.quiet
 do_generate_homophones = False  # Generate homophones (same sounds)
 do_generate_consonances = False  # Generate consonances (same consonants)
 do_permute_consonants = False  # Generate swap-consonances (permute consonants)
-if do_convert == 1:
+if do_homophones:
     do_generate_homophones = True
-elif do_convert == 2:
+if do_consonances:
     do_generate_consonances = True
-elif do_convert == 3:
+if do_permutations:
     do_permute_consonants = True
 
 do_check_grammar = False
@@ -49,6 +55,10 @@ if do_grammar > 0:
     cap_and_punc = True
     if do_check_grammar == 2:
         do_check_grammar_again = True  # Check grammar with a second tool
+
+same_number_of_syllables = True
+if no_limit:
+    same_number_of_syllables = False
 
 #-----------------------------------------------------------------------------                                              
 # Settings
@@ -81,6 +91,9 @@ max_phonemes = nwords * max_phonemes_per_word
 # Convert words to phonemes
 phonemes, consonants, stresses, nsyllables = words_to_sounds(words, phoneme_list, consonant_list)
 
+if not same_number_of_syllables:
+    nsyllables = None
+
 # Split up consonant compounds ("I scream" => "ice cream")
 if do_split_up_consonants:
     phonemes = separate_consonants(phonemes)
@@ -101,24 +114,30 @@ if do_save:
 #-----------------------------------------------------------------------------                                              
 # Homophones
 if do_generate_homophones:
-    homophones = generate_homophones(phonemes, max_phonemes, max_phonemes_per_word, False, False, ignore_inputs, verbose2)
+    homophones = generate_homophones(phonemes, max_phonemes, max_phonemes_per_word, False, False, None, None, ignore_inputs, verbose2)
     if do_grammar:
         homophones = check_grammar_twice(homophones, grammar_tool, grammar_tool2, cap_and_punc, do_check_grammar_again, verbose2)
     display_save_output(homophones, 'homophones', input_text, do_save, filename_base, verbose)
 
 # Consonances
 if do_generate_consonances:
-    consonances = generate_homophones(phonemes, max_phonemes, max_phonemes_per_word, True, False, ignore_inputs, verbose2)
+    consonances = generate_homophones(phonemes, max_phonemes, max_phonemes_per_word, True, False, consonant_list, nsyllables, ignore_inputs, verbose2)
     if do_grammar:
         consonances = check_grammar_twice(consonances, grammar_tool, grammar_tool2, cap_and_punc, do_check_grammar_again, verbose2)
-    display_save_output(consonances, 'consonances', input_text, do_save, filename_base, verbose)
+    make_name = 'consonances'
+    if nsyllables:
+        make_name += '.nsyllables'
+    display_save_output(consonances, make_name, input_text, do_save, filename_base, verbose)
 
 # Swap-consonances
 if do_permute_consonants:
-    swap_consonants = generate_homophones(phonemes, max_phonemes, max_phonemes_per_word, True, True, ignore_inputs, verbose2)
+    swap_consonants = generate_homophones(phonemes, max_phonemes, max_phonemes_per_word, True, True, consonant_list, nsyllables, ignore_inputs, verbose2)
     if do_grammar:
         swap_consonants = check_grammar_twice(consonances, grammar_tool, grammar_tool2, cap_and_punc, do_check_grammar_again, verbose2)
-    display_save_output(swap_consonants, 'swap_consonants', input_text, do_save, filename_base, verbose)
+    make_name = 'swap_consonants'
+    if nsyllables:
+        make_name += '.nsyllables'
+    display_save_output(swap_consonants, make_name, input_text, do_save, filename_base, verbose)
 
 if verbose:
     print('\nDone')

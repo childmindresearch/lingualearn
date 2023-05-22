@@ -42,7 +42,7 @@ def display_save_output(input_list, input_name, input_text,
     '''
 
     # Write output to a text file
-    if len(input_list) > 1:
+    if input_list and len(input_list) > 1:
         if verbose:
             print('')
             print('==============================================================================================')
@@ -53,7 +53,7 @@ def display_save_output(input_list, input_name, input_text,
         if do_save_files:
             if not filename_base.endswith("."):
                 filename_base += "."
-            outfile = filename_base + input_name.upper() + '.txt'
+            outfile = filename_base + input_name + '.txt'
             fwrite = open(outfile, "w")
             fwrite.write('')
             fwrite.close()
@@ -62,7 +62,7 @@ def display_save_output(input_list, input_name, input_text,
                 fwrite.write(new_line + '\n')
             fwrite.close()
             if verbose:
-                print('\n{0} written to {1}'.format(input_name.capitalize(), outfile), end='\n')
+                print('\n{0} {1} written to {2}'.format(len(input_list), input_name, outfile), end='\n')
     else:
         if verbose:
             print('\n0 {0} for "{1}"'.format(input_name, input_text), end='\n')

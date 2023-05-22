@@ -6,6 +6,7 @@ Copyright 2021-2023, Arno Klein, MIT License
 
 '''
 import re
+from itertools import permutations
 from g2p_en import G2p  # pip install g2p_en
 word_to_phonemes = G2p()
 from io_files import load_object
@@ -19,7 +20,6 @@ all_words = load_object(dictionary_folder + 'words_{0}.pkl'.format(filter_dictio
 all_consonants = load_object(dictionary_folder + 'consonants_{0}.pkl'.format(filter_dictionary))
 all_pronunciations = load_object(dictionary_folder + 'pronunciations_{0}.pkl'.format(filter_dictionary))
 all_stresses = load_object(dictionary_folder + 'stresses_{0}.pkl'.format(filter_dictionary))
-
 # Note: vowel 'ER' converted to vowel 'ER' and consonant 'R'
 phoneme_list = ['AA','AH','AW','B','D','EH','EY','G','IH','JH','L','N','OW','P','S','T','UH','V','Y','ZH',
                 'AE','AO','AY','CH','DH','ER','F','HH','IY','K','M','NG','OY','R','SH','TH','UW','W','Z']
@@ -318,7 +318,6 @@ def phonemes_to_words(phonemes, all_words, all_pronunciations, all_consonants, c
 
     words_starts_stops = []    
     start = 0
-    unique_stops = [-1]
     nphonemes = len(phonemes)
     while start < nphonemes:
 
@@ -328,21 +327,22 @@ def phonemes_to_words(phonemes, all_words, all_pronunciations, all_consonants, c
         for stop in range(start + 1, max_stop):
 
             phoneme_subset = phonemes[start:stop]
-            phoneme_subset = combine_consonants(phoneme_subset)
 
             # Find words with matching consonants:
             if just_consonants:
-                consonant_subset = [x for x in phoneme_subset if x in consonant_list]
-                if consonant_subset != [] and consonant_subset not in consonant_subsets:
-                    consonant_subsets.append(consonant_subset)
-                    try:
-                        indices = [i for i,x in enumerate(all_consonants) if x == consonant_subset]
-                        for index in indices:
-                            words_starts_stops.append([all_words[index], start, stop - 1])
-                    except: pass
+                for phoneme_subset_loop in [phoneme_subset, combine_consonants(phoneme_subset)]:
+                    consonant_subset = [x for x in phoneme_subset_loop if x in consonant_list]
+                    if consonant_subset != [] and consonant_subset not in consonant_subsets:
+                        consonant_subsets.append(consonant_subset)
+                        try:
+                            indices = [i for i,x in enumerate(all_consonants) if x == consonant_subset]
+                            for index in indices:
+                                words_starts_stops.append([all_words[index], start, stop - 1])
+                        except: pass
 
             # Find words with fully matching pronunciations:
             else:
+                phoneme_subset = combine_consonants(phoneme_subset)
                 try:
                     indices = [i for i,x in enumerate(all_pronunciations) if x == phoneme_subset]
                     for index in indices:
@@ -597,7 +597,7 @@ def concatenate_word_pairs(prev_words, prev_stops, words_by_start, stops_by_star
     return new_words, new_stops
 
 
-def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count):
+def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count, nsyllables=None):
     '''
     Create a list of text strings from sequences of words using the words' start and stop indices.
 
@@ -621,7 +621,8 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
     >>> unique_starts = [0, 1, 2, 4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 21, 23, 25]
     >>> max_stop = 27  # number of phonemes + 1
     >>> max_count = 26  # number of phonemes 
-    >>> words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count)
+    >>> nsyllables = None
+    >>> words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count, nsyllables)
                             
     ["a which's itself conscious oar without agency",
      "a which's itself conscious or without agency",
@@ -661,8 +662,15 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
     prev_stops = stops_by_start[0]
     for i,x in enumerate(prev_stops):
         if x == max_stop:
-            max_stops.append(x)
-            max_words.append(prev_words[i])
+            if nsyllables:
+                nsyllables2 = count_syllables(prev_words[i], syllable_vowel_runs,
+                                              syllable_exceptions, additional_syllables)
+                if nsyllables == nsyllables2:
+                    max_stops.append(x)
+                    max_words.append(prev_words[i])
+            else:
+                max_stops.append(x)
+                max_words.append(prev_words[i])
     count = 1
     run = True
     while(run):
@@ -676,10 +684,19 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
         # and prepare to concatenate more words in the next loop
         prev_words = []
         prev_stops = []
-        for i,x in enumerate(new_stops):
+        for i,x in enumerate(new_stops):  #indices = [i for i, x in enumerate(new_stops) if x == max_stop]
             if x == max_stop:
-                max_stops.append(x)
-                max_words.append(new_words[i])
+                if nsyllables:
+                    nsyllables2 = 0
+                    for new_word in new_words[i]:
+                        nsyllables2 += count_syllables(new_word, syllable_vowel_runs, 
+                                                       syllable_exceptions, additional_syllables)
+                    if nsyllables2 == nsyllables:
+                        max_stops.append(x)
+                        max_words.append(new_words[i])
+                else:
+                    max_stops.append(x)
+                    max_words.append(new_words[i])
             else:
                 prev_stops.append(x)
                 prev_words.append(new_words[i])
@@ -703,7 +720,8 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
 # or consonances (same consonants and consonant neighbors, different vowels).                                                                                      
 #-----------------------------------------------------------------------------                                              
 def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25, just_consonants=False, 
-                        do_permute_consonants=False, ignore_words=None, verbose=False):
+                        do_permute_consonants=False, consonant_list=None, nsyllables=None, 
+                        ignore_words=None, verbose=False):
     '''
     Generate homophone words or sentences (same sounds, different words) from a sequence of phonemes.
     
@@ -718,10 +736,11 @@ def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25, just_c
     >>> max_phonemes_per_word = 25
     >>> just_consonants = False
     >>> do_permute_consonants = False
+    >>> nsyllables = None
     >>> ignore_words = None
     >>> verbose = False
-    generate_homophones(phonemes, max_count, max_phonemes_per_word, just_consonants, do_permute_consonants, 
-                        ignore_words, verbose)
+    generate_homophones(phonemes, max_count, max_phonemes_per_word, just_consonants, 
+                        do_permute_consonants, consonant_list, ignore_words, verbose)
                         
     ["a which's itself conscious oar without agency",
      ...
@@ -729,57 +748,50 @@ def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25, just_c
      ...
      "uhh which is itself conscious oar without age 'n sci",
      ...]
- 
-    >>> just_consonants = True
-    generate_homophones(phonemes, max_count, max_phonemes_per_word, just_consonants, do_permute_consonants,
-                        ignore_words, verbose)
-    ['languages continue to evolve',
-     'languages continue too evolve',
-     'languages continue two evolve']
+
     '''
     
     # Permute consonants (different sequence of same consonants, different vowels)
-    if do_permute_consonants and just_consonants:
-        consonants = [x for x in phonemes if x in consonant_list]
-        consonant_permutations = [x for x in permutations(consonants)]
+    if just_consonants:
+        if do_permute_consonants:
+            consonants = [x for x in phonemes if x in consonant_list]
+            consonant_permutations = [list(x) for x in permutations(consonants)]
 
-        # Loop through every permutation of consonants
-        words_starts_stops = []
-        for consonant_permutation in consonant_permutations:
-            phoneme_permutation = []
-            count = 0
-            for phoneme in phonemes:
-                if phoneme in consonant_list:
-                    phoneme_permutation.append(consonant_permutation[count])
-                    count += 1
-                else:
-                    phoneme_permutation.append(phoneme)
-
-            words_starts_stops_permutation = phonemes_to_words(phoneme_permutation, all_words, all_pronunciations, 
-                                                               all_consonants, consonant_list, True, 
-                                                               max_phonemes_per_word, ignore_words)
-            words_starts_stops.extend(words_starts_stops_permutation)
- 
+            # Loop through every permutation of consonants
+            words_starts_stops = []
+            for consonant_permutation in consonant_permutations:
+                #indices = [index for index, sublist in enumerate(all_consonants) if sublist == consonant_permutation]
+                #for index in indices:
+                #    words_starts_stops_permutation = phonemes_to_words(all_pronunciations[index], 
+                #        all_words, all_pronunciations, all_consonants, consonant_list, 
+                #        True, max_phonemes_per_word, ignore_words)
+                    words_starts_stops_permutation = phonemes_to_words(consonant_permutation, 
+                        all_words, all_pronunciations, all_consonants, consonant_list, 
+                        True, max_phonemes_per_word, ignore_words)
+                    #print(index, all_pronunciations[index], words_starts_stops_permutation)
+                    if words_starts_stops_permutation:
+                        words_starts_stops.extend(words_starts_stops_permutation)
+        else:
+            words_starts_stops = phonemes_to_words(phonemes, 
+                all_words, all_pronunciations, all_consonants, consonant_list, 
+                True, max_phonemes_per_word, ignore_words)
     else:
-        words_starts_stops = phonemes_to_words(phonemes, all_words, all_pronunciations, all_consonants, 
-                                               consonant_list, just_consonants, max_phonemes_per_word, 
-                                               ignore_words)
-    
-    if words_starts_stops:
-        #consonants1 = separate_consonants(consonants)
-        #phonemes2, consonants2, stresses2, nsyllables2 = words_to_sounds(new_words[istop], 
-        #consonants2 = separate_consonants(consonants2)
-        #if len(consonants1) != len(consonants2):
+        words_starts_stops = phonemes_to_words(phonemes, 
+            all_words, all_pronunciations, all_consonants, consonant_list, 
+            False, max_phonemes_per_word, ignore_words)
 
+    if words_starts_stops:
         if verbose:
             print('Words: {0}'.format(', '.join([x[0] for x in words_starts_stops])), end='\n')
+    
         words_starts_stops = flatten_to_sublists_of_strings(words_starts_stops) 
-        words_by_start, stops, unique_starts, unique_stops, max_start, max_stop = organize_words_by_start(words_starts_stops)
 
+        words_by_start, stops, unique_starts, unique_stops, max_start, max_stop = organize_words_by_start(words_starts_stops)
         #print('Words sorted by start index:  {0}'.format(words_by_start), end='\n')
-        homophones = words_stop_to_start(words_by_start, stops, unique_starts, max_stop, max_count)
+
+        homophones = words_stop_to_start(words_by_start, stops, unique_starts, max_stop, max_count, nsyllables)
     else:
         homophones = None
-    
+
     return homophones
 
