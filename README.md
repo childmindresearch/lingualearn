@@ -20,7 +20,9 @@ Potential applications include:
 
 ## Phonemes and Carnegie Mellon Pronouncing Dictionary
 
-(See https://github.com/cmusphinx/cmudict/tree/4c6a365cea2c34340ffc218d5af7a38920fa7e37)
+http://www.speech.cs.cmu.edu/cgi-bin/cmudict
+
+https://github.com/cmusphinx/cmudict/tree/4c6a365cea2c34340ffc218d5af7a38920fa7e37
 
 From https://www.nltk.org/_modules/nltk/corpus/reader/cmudict.html:
 
