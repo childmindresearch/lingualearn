@@ -597,7 +597,7 @@ def concatenate_word_pairs(prev_words, prev_stops, words_by_start, stops_by_star
     return new_words, new_stops
 
 
-def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count, nsyllables=None):
+def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count, limit=None, nwords=None, nsyllables=None):
     '''
     Create a list of text strings from sequences of words using the words' start and stop indices.
 
@@ -621,8 +621,10 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
     >>> unique_starts = [0, 1, 2, 4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 21, 23, 25]
     >>> max_stop = 27  # number of phonemes + 1
     >>> max_count = 26  # number of phonemes 
+    >>> limit = None
+    >>> nwords = None
     >>> nsyllables = None
-    >>> words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count, nsyllables)
+    >>> words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop, max_count, limit, nwords, nsyllables)
                             
     ["a which's itself conscious oar without agency",
      "a which's itself conscious or without agency",
@@ -660,17 +662,37 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
     max_stops = []
     prev_words = words_by_start[0]
     prev_stops = stops_by_start[0]
-    for i,x in enumerate(prev_stops):
+    for i, x in enumerate(prev_stops):
         if x == max_stop:
-            if nsyllables:
-                nsyllables2 = count_syllables(prev_words[i], syllable_vowel_runs,
+            prev_words0 = prev_words[i]
+            if limit == 'both':
+                if isinstance(prev_words0, list):
+                    len_prev_words0 = len(prev_words0)
+                else:
+                    len_prev_words0 = 1
+                if len_prev_words0 == nwords:
+                    nsyllables2 = count_syllables(prev_words0, syllable_vowel_runs,
                                               syllable_exceptions, additional_syllables)
-                if nsyllables == nsyllables2:
+                    if nsyllables2 == nsyllables:
+                        max_stops.append(x)
+                        max_words.append(prev_words0)
+            elif limit == 'words':
+                if isinstance(prev_words0, list):
+                    len_prev_words0 = len(prev_words0)
+                else:
+                    len_prev_words0 = 1
+                if len_prev_words0 == nwords:
                     max_stops.append(x)
-                    max_words.append(prev_words[i])
+                    max_words.append(prev_words0)
+            elif limit == 'syllables':
+                nsyllables2 = count_syllables(prev_words0, syllable_vowel_runs,
+                                              syllable_exceptions, additional_syllables)
+                if nsyllables2 == nsyllables:
+                    max_stops.append(x)
+                    max_words.append(prev_words0)
             else:
                 max_stops.append(x)
-                max_words.append(prev_words[i])
+                max_words.append(prev_words0)
     count = 1
     run = True
     while(run):
@@ -684,22 +706,44 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
         # and prepare to concatenate more words in the next loop
         prev_words = []
         prev_stops = []
-        for i,x in enumerate(new_stops):  #indices = [i for i, x in enumerate(new_stops) if x == max_stop]
+        for i, x in enumerate(new_stops):  #indices = [i for i, x in enumerate(new_stops) if x == max_stop]
+            new_words2 = new_words[i]
             if x == max_stop:
-                if nsyllables:
+                if limit == 'both':
+                    if isinstance(new_words2, list):
+                        len_new_words2 = len(new_words2)
+                    else:
+                        len_new_words2 = 1
+                    if len_new_words2 == nwords:
+                        nsyllables2 = 0
+                        for new_word in new_words2:
+                            nsyllables2 += count_syllables(new_word, syllable_vowel_runs, 
+                                                        syllable_exceptions, additional_syllables)
+                        if nsyllables2 == nsyllables:
+                            max_stops.append(x)
+                            max_words.append(new_words2)
+                elif limit == 'words':
+                    if isinstance(new_words2, list):
+                        len_new_words2 = len(new_words2)
+                    else:
+                        len_new_words2 = 1
+                    if len_new_words2 == nwords:
+                        max_stops.append(x)
+                        max_words.append(new_words2)
+                elif limit == 'syllables':
                     nsyllables2 = 0
-                    for new_word in new_words[i]:
+                    for new_word in new_words2:
                         nsyllables2 += count_syllables(new_word, syllable_vowel_runs, 
                                                        syllable_exceptions, additional_syllables)
                     if nsyllables2 == nsyllables:
                         max_stops.append(x)
-                        max_words.append(new_words[i])
+                        max_words.append(new_words2)
                 else:
                     max_stops.append(x)
-                    max_words.append(new_words[i])
+                    max_words.append(new_words2)
             else:
                 prev_stops.append(x)
-                prev_words.append(new_words[i])
+                prev_words.append(new_words2)
 
         # Halt when all stops equal max_stop or until we loop max_count times
         if all([x == max_stop for x in new_stops]) or count == max_count:
@@ -719,8 +763,10 @@ def words_stop_to_start(words_by_start, stops_by_start, unique_starts, max_stop,
 # Function to generate homophones (same sounds, different words)   
 # or consonances (same consonants and consonant neighbors, different vowels).                                                                                      
 #-----------------------------------------------------------------------------                                              
-def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25, just_consonants=False, 
-                        do_permute_consonants=False, consonant_list=None, nsyllables=None, 
+def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25, 
+                        just_consonants=False, do_permute_consonants=False, 
+                        consonant_list=None, 
+                        limit=None, nwords=None, nsyllables=None, 
                         ignore_words=None, verbose=False):
     '''
     Generate homophone words or sentences (same sounds, different words) from a sequence of phonemes.
@@ -736,17 +782,19 @@ def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25, just_c
     >>> max_phonemes_per_word = 25
     >>> just_consonants = False
     >>> do_permute_consonants = False
+    >>> limit = None
+    >>> nwords = None
     >>> nsyllables = None
     >>> ignore_words = None
     >>> verbose = False
     generate_homophones(phonemes, max_count, max_phonemes_per_word, just_consonants, 
-                        do_permute_consonants, consonant_list, ignore_words, verbose)
+                        do_permute_consonants, consonant_list, 
+                        limit, nwords, nsyllables, 
+                        ignore_words, verbose)
                         
     ["a which's itself conscious oar without agency",
      ...
      'a which is itself conscious or without agency',
-     ...
-     "uhh which is itself conscious oar without age 'n sci",
      ...]
 
     '''
@@ -789,7 +837,7 @@ def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25, just_c
         words_by_start, stops, unique_starts, unique_stops, max_start, max_stop = organize_words_by_start(words_starts_stops)
         #print('Words sorted by start index:  {0}'.format(words_by_start), end='\n')
 
-        homophones = words_stop_to_start(words_by_start, stops, unique_starts, max_stop, max_count, nsyllables)
+        homophones = words_stop_to_start(words_by_start, stops, unique_starts, max_stop, max_count, limit, nwords, nsyllables)
     else:
         homophones = None
 
