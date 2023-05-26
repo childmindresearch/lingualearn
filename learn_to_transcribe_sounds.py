@@ -9,8 +9,6 @@ import argparse
 import random
 
 from process_phonemes import phoneme_list, consonant_list, words_to_sounds, separate_consonants, generate_homophones
-from check_grammar import check_grammar_twice, grammar_tool, grammar_tool2
-from io_files import display_save_output
 from speak import text_to_speech
 
 #-----------------------------------------------------------------------------                                              
@@ -21,9 +19,11 @@ parser = argparse.ArgumentParser(description="""
                      formatter_class = lambda prog:
                      argparse.HelpFormatter(prog, max_help_position=40))
 parser.add_argument('text', type=str, help='Enter a string of text')
+parser.add_argument("-c", "--choices", type=int, help="Number of choices per question (default = 3)", default=3)
 args = parser.parse_args()
 
 input_text = args.text
+nchoices = args.choices
 verbose = True
 
 #-----------------------------------------------------------------------------                                              
@@ -31,8 +31,6 @@ verbose = True
 #-----------------------------------------------------------------------------                                              
 ignore_inputs = []  # Don't use any of these words
 max_phonemes_per_word = 25
-nchoices = 5
-limit = 'words'
 
 #-----------------------------------------------------------------------------                                              
 # Loop until user exits
