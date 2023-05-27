@@ -1,27 +1,30 @@
 #!/usr/bin/env python                                                                                                       
 '''                                                                                                                        
-Functions to test a user to match sounds with text.
+Main program for a user to respond to individual language tasks.
 
-select_text_to_match_spoken_text()
-type_text_to_match_spoken_text()
+Ex: python lingualearn.py -i pair -n 3 -sel 5 -typ -imi 3 -def -syn -ant -jeo -sen
+
+-sel [number of response options (int)]: select_text_to_match_spoken_text()
+-typ: type_text_to_match_spoken_text()
 - Listen, then select or type matching text (smart version of Grapholearn)
     - The app plays text-to-speech for letter(s), phoneme(s), or word(s).
     - Users either select among text response options for a match 
       with the spoken text, or users type the correct text.
 
-imitate_spoken_text()
+-imi [recording duration in seconds (int)]: imitate_spoken_text()
 - Imitate sounds within or across languages.
     - The app plays a sound (letter, phoneme, word, or sentence).
     - Users repeat what they heard, imitating the sound.
     - The app transcribes what the user said and checks if it is correct.
 
-type_word_to_match_context(): definition, synonym, antonym, or jeopardy
+type_word_to_match_context()
+-def: definition, -syn: synonym, -ant: antonym, or -jeo: jeopardy
 - Type words that match definitions or other semantic clues
     - The app presents a definition, synonym, antonym, or Jeopardy! question. 
     - Users type the corresponding word.
     - The app uses an LLM to check the word usage.
 
-type_word_in_a_sentence()
+-sen: type_word_in_a_sentence()
 - Use a word in a sentence.
     - The app shows a word.
     - Users use the word in a type-written sentence.
@@ -50,7 +53,7 @@ parser.add_argument("-i", "--input_text", type=str, help='Enter text for demonst
 parser.add_argument("-n", "--number_attempts", type=int, help="Number of attempts permitted to respond to a question (default = None for infinite)", default=3)
 parser.add_argument("-sel", "--select_sound", type=int, help="Listen, then select matching text from specified number of response options (default number is 0 for off)", default=0)
 parser.add_argument("-typ", "--type_sound", action='store_true', help="Listen, then type matching text.")
-parser.add_argument("-imi", "--imitate_sound", action='store_true', help="Imitate sounds.")
+parser.add_argument("-imi", "--imitate_sound", type=int, help="Imitate sounds for a specified number of seconds (default number is 0 for off)", default=0)
 parser.add_argument("-def", "--match_definition", action='store_true', help="Type word that matches a definition.")
 parser.add_argument("-syn", "--match_synonym", action='store_true', help="Type word that matches a synonym.")
 parser.add_argument("-ant", "--match_antonym", action='store_true', help="Type word that matches an antonym.")
@@ -80,7 +83,7 @@ do_match_synonym = False
 do_match_antonym = False
 do_match_jeopardy = False
 do_type_sentence = False
-verbose = False
+verbose = True
 if input_text:
     do_input_text = True
 if select_sound:
@@ -90,6 +93,7 @@ if type_sound:
     do_type_sound = True
 if imitate_sound:
     do_imitate_sound = True
+    duration = imitate_sound
 if match_definition:
     do_match_definition = True
 if match_synonym:
@@ -101,7 +105,9 @@ if match_jeopardy:
 if type_sentence:
     do_type_sentence = True
 if quiet:
-    verbose = True
+    verbose = False
+
+output_audio = "tmp/output.wav"
 
 #-----------------------------------------------------------------------------                                              
 # Functions                                                                                                  
@@ -296,7 +302,7 @@ def type_text_to_match_spoken_text(input_text, max_phonemes_per_word=25, ntries=
             print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
 
 
-def imitate_spoken_text(input_text, duration=5, output_audio="tmp/output.wav", 
+def imitate_spoken_text(input_text, duration=3, output_audio="tmp/output.wav", 
                         ntries=None, verbose=False):
     '''
     Function for a user to imitate spoken text.
@@ -479,7 +485,7 @@ if do_imitate_sound:
         display_header('imitate_spoken_text()')
     if not do_input_text:
         input_text = 'bicycle'
-    imitate_spoken_text(input_text, duration=5, output_audio="tmp/output.wav", ntries=ntries)
+    imitate_spoken_text(input_text, duration, output_audio, ntries)
 if do_match_definition:
     if verbose:
         display_header('type_word_to_match_context(): definition')
