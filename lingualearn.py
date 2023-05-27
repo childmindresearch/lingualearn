@@ -9,6 +9,8 @@ import random
 
 from process_phonemes import phoneme_list, consonant_list, words_to_sounds, separate_consonants, generate_homophones
 from speak import text_to_speech
+from call_gpt import generate_chatgpt_response
+from speak import speech_to_text
 
 
 #-----------------------------------------------------------------------------                                              
@@ -25,8 +27,11 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
     >>> max_phonemes_per_word = 25
     >>> ignore_inputs = None
     >>> verbose = False
-    >>> select_text_to_match_spoken_text(input_text, nchoices, nloops, max_phonemes_per_word, ignore_inputs, verbose)
+    >>> select_text_to_match_spoken_text(input_text, nchoices, ntries, max_phonemes_per_word, ignore_inputs, verbose)
     '''
+
+    print('\nListen...')
+
     #--------------------------------------------------------------------------                                              
     # Process input text
     #--------------------------------------------------------------------------                                              
@@ -85,9 +90,11 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
     # Include only the specified number of response selections
     morphs = [x for i, x in enumerate(morphs) if i < nchoices]
 
-    #--------------------------------------------------------------------------                                              
-    # Loop until the user chooses the correct answer or until reaches ntries 
-    #--------------------------------------------------------------------------                                              
+    # Prompt the user for their choice
+    text_to_speech(input_text)
+    print('\nWhich one sounds the same as what you just heard?')
+
+    # Loop until user exits, types in the correct answer, or reaches ntries                                              
     score = 0
     tries = 0
     correct = False
@@ -95,9 +102,6 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
 
         random.shuffle(morphs)
 
-        # Prompt the user for their choice
-        text_to_speech(input_text)
-        print('\nWhich one sounds the same?')
         ichoice = 0
         while ichoice < len(morphs):
             print('({0}) {1}'.format(ichoice + 1, morphs[ichoice]))
@@ -109,64 +113,207 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
         # Feedback
         if not nchoice:
             correct = True
-            loop = False
             print('\nScore: {0}/{1}\n'.format(score, tries))
         else:
+            tries += 1
             if int(nchoice) - 1 == icorrect:
                 score += 1
-                tries += 1
                 correct = True
-                loop = False
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
-            else:
-                tries += 1
-                print('\nTry again. Score: {0}/{1}'.format(score, tries))
+            elif ntries and tries < ntries:
+                print('\nTry again!\n')
+                text_to_speech(input_text)
 
-        if ntries and tries == ntries:
+        if correct == False and ntries and tries == ntries:
             correct = True   
             print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
 
 
-def type_text_to_match_spoken_text(input_text, nchoices=3, nloops=None, verbose=False):
+def type_text_to_match_spoken_text(input_text, ntries=None, verbose=False):
     '''
     Function for a user to type text to match spoken text.
 
     >>> input_text = 'Test'
-    >>> nchoices = 3
     >>> ntries = None 
     >>> verbose = False
-    >>> type_text_to_match_spoken_text(input_text, nchoices, nloops, verbose)
+    >>> type_text_to_match_spoken_text(input_text, ntries, verbose)
     '''
-    #--------------------------------------------------------------------------                                              
-    # Loop until user exits or until reaches ntries
-    #--------------------------------------------------------------------------                                             
+
+    print('\nListen...')
+
+    # Say the text
+    text_to_speech(input_text)
+
+    # Prompt the user for text
+    entered_text = input('\nType what you heard (or Return to exit): ')
+
+    # Loop until user exits, types in the correct answer, or reaches ntries
     score = 0
     tries = 0
     correct = False
     while correct == False:
 
-        # Say the text
-        text_to_speech(input_text)
-
-        # Prompt the user for text
-        entered_text = input('\nType what you heard (or Return to exit): ')
-
         # Feedback
         if not entered_text:
             correct = True
-            loop = False
             print('\nScore: {0}/{1}\n'.format(score, tries))
         else:
+            tries += 1
             if entered_text.strip().lower() == input_text.strip().lower():
                 score += 1
-                tries += 1
                 correct = True
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
-            else:
-                tries += 1
-                print('\nTry again. Score: {0}/{1}'.format(score, tries))
+            elif ntries and tries < ntries:
+                text_to_speech(input_text)
+                entered_text = input('\nTry again: ')
 
-        if ntries and tries == ntries:
+        if correct == False and ntries and tries == ntries:
+            correct = True   
+            print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
+
+
+def type_word_to_match_context(word, context='definition', ntries=None, verbose=False):
+    '''
+    Function for a user to type a word to match a definition, synonym, antonym, or Jeopardy!-style description.
+
+    >>> word = 'Test'
+    >>> context = 'definition'
+    >>> ntries = None 
+    >>> verbose = False
+    >>> type_word_to_match_definition(word, ntries, verbose)
+    '''
+
+    if context == 'definition':
+        # Get a ChatGPT-generated definition for the word
+        prompt = "Return a brief definition for the following word without using the word (or number, if relevant) in the definition: '{0}'".format(word)
+        response = generate_chatgpt_response(prompt)
+        print("\nChatGPT-generated definition:\n{0}".format(response))
+        entered_word = input('\nType a word that matches this definition: ')
+    elif context == 'synonym':
+        # Get ChatGPT-generated synonyms for the word
+        prompt = "List synonyms for the following word without using the word (or number, if relevant) at all: '{0}'".format(word)
+        response = generate_chatgpt_response(prompt)
+        print("\nChatGPT-generated synonyms:\n{0}".format(response))
+        entered_word = input('\nType a word that is similar in meaning as these words: ')
+    elif context == 'antonym':
+        # Get ChatGPT-generated antonyms for the word
+        prompt = "List antonyms for the following word without using the word (or number, if relevant) at all: '{0}'".format(word)
+        response = generate_chatgpt_response(prompt)
+        print("\nChatGPT-generated antonyms:\n{0}".format(response))
+        entered_word = input('\nType a word that means the opposite of these words: ')
+    elif context == 'jeopardy':
+        # Get ChatGPT-generated Jeopardy!-style description referring to the word
+        prompt = "Return a very brief Jeopardy!-style description related to the following word without using the word (or number, if relevant) at all: '{0}'".format(word)
+        response = generate_chatgpt_response(prompt)
+        print("\nChatGPT-generated Jeopardy-style description:\n{0}".format(response))
+        entered_word = input('\nType a word that matches this description: ')
+
+    # Loop until user exits, types in the correct word, or reaches ntries
+    score = 0
+    tries = 0
+    correct = False
+    while correct == False:
+
+        # Feedback
+        if not entered_word:
+            correct = True
+            print('\nScore: {0}/{1}\n'.format(score, tries))
+        else:
+            tries += 1
+            if entered_word.strip().lower() == word.strip().lower():
+                score += 1
+                correct = True
+                print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
+            elif ntries and tries < ntries:
+                entered_word = input('\nTry again: ')
+
+        if correct == False and ntries and tries == ntries:
+            correct = True   
+            print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
+
+
+def type_word_in_a_sentence(word, ntries=None, verbose=False):
+    '''
+    Function for a user to type a word in a sentence.
+
+    >>> word = 'Test'
+    >>> ntries = None 
+    >>> verbose = False
+    >>> type_word_in_a_sentence(word, ntries, verbose)
+    '''
+
+    entered_text = input('\nType a sentence containing the word "{0}": '.format(word))
+
+    # Loop until user exits, types in the correct word, or reaches ntries
+    score = 0
+    tries = 0
+    correct = False
+    while correct == False:
+
+        if not entered_text:
+            correct = True
+            print('\nScore: {0}/{1}\n'.format(score, tries))
+        else: 
+            tries += 1
+           
+            # Check word usage using ChatGPT
+            prompt = 'Return just the number 1 if SENTENCE uses the word "{0}" appropriately, or just the number 0 if it does not. If SENTENCE uses the word in a trivial manner, like "{0} is a word with {1} letters." return just the number 2. SENTENCE is: "{2}"'.format(word, len(word), entered_text)
+            response = generate_chatgpt_response(prompt)
+            if response == '1':
+                correct = True
+                score += 1
+                print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
+            elif response == '2' and ntries and tries < ntries:
+                entered_text = input('\nPlease try again, using the word in a way that conveys its meaning: ')
+            elif ntries and tries < ntries:
+                entered_text = input('\nTry again: ')
+
+        if correct == False and ntries and tries == ntries:
+            correct = True   
+            print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
+
+
+def imitate_spoken_text(input_text, duration=5, output_audio="tmp/output.wav", 
+                        ntries=None, verbose=False):
+    '''
+    Function for a user to imitate spoken text.
+
+    >>> input_text = 'Test'
+    >>> ntries = None 
+    >>> verbose = False
+    >>> imitate_spoken_text(input_text, ntries, verbose)
+    '''
+    # Play spoken text
+    print('\nListen...')
+    text_to_speech(input_text)
+    print('\nRepeat exactly what you just heard as you record the audio below...')
+
+    # Record and transcribe the user's speech
+    output_text = speech_to_text(duration, output_audio)
+
+    # Loop until user exits, says the correct answer, or reaches ntries                                              
+    score = 0
+    tries = 0
+    correct = False
+    while correct == False:
+
+        if not output_text:
+            correct = True
+            print('\nScore: {0}/{1}\n'.format(score, tries))
+        else: 
+            tries += 1
+        
+            # Check imitation using speech-to-text
+            if output_text == input_text:
+                correct = True
+                score += 1
+                print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
+            elif ntries and tries < ntries:
+                print('\nTry again. This is what speech-to-text interpreted from what you said:\n"{0}"'.format(output_text))
+                text_to_speech(input_text)
+                output_text = speech_to_text(duration, output_audio)
+
+        if correct == False and ntries and tries == ntries:
             correct = True   
             print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
 
@@ -174,11 +321,25 @@ def type_text_to_match_spoken_text(input_text, nchoices=3, nloops=None, verbose=
 #-----------------------------------------------------------------------------                                              
 # Demo                                                                                                  
 #-----------------------------------------------------------------------------                                              
-input_text = 'Test'
-nchoices = 3
-ntries = None 
-max_phonemes_per_word = 25
-ignore_inputs = None
-verbose = False
-select_text_to_match_spoken_text(input_text, nchoices, ntries, max_phonemes_per_word, ignore_inputs, verbose)
-type_text_to_match_spoken_text(input_text, nchoices, ntries, verbose)
+test1 = 'one'
+test2 = 'two'
+test3 = 'bicycle'
+test4 = 'thin'
+test5 = 'deep'
+test6 = 'six'
+test7 = 'gigantic'
+test8 = 'wash rinse and repeat'
+nchoices = 5
+ntries = 3
+duration = 3
+output_audio = 'tmp/output.wav'
+demo_all = True
+if demo_all:
+    select_text_to_match_spoken_text(test1, nchoices, ntries, 25, None)
+    type_text_to_match_spoken_text(test2, ntries)
+    type_word_to_match_context(test3, 'definition', ntries)
+    type_word_to_match_context(test4, 'synonym', ntries)
+    type_word_to_match_context(test5, 'antonym', ntries)
+    type_word_to_match_context(test6, 'jeopardy', ntries)
+    type_word_in_a_sentence(test7, ntries)
+    imitate_spoken_text(test8, duration, output_audio, ntries)

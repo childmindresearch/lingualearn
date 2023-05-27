@@ -15,6 +15,7 @@ Copyright 2023, Arno Klein, MIT License
 
 '''
 import string 
+from call_gpt import generate_chatgpt_response
 
 #-----------------------------------------------------------------------------                                              
 # Set the tool(s) to check grammar. 
@@ -23,24 +24,13 @@ import string
 #-----------------------------------------------------------------------------                                              
 grammar_tool = "caribe"
 #grammar_tool = "language_tool"
-#grammar_tool = "chatgpt4"
-#grammar_tool = "chatgpt3"
+#grammar_tool = "chatgpt"
 do_check_grammar_again = True  
-grammar_tool2 = "chatgpt4"
+grammar_tool2 = "chatgpt"
 
 #-----------------------------------------------------------------------------                                              
 # Load the selected grammar tool(s)                                                                                     
 #-----------------------------------------------------------------------------                                              
-if grammar_tool == "chatgpt4" or (do_check_grammar_again and grammar_tool2=="chatgpt4"):
-    import os
-    import openai
-    openai.api_key = os.getenv("OPENAI4_API_KEY")
-    chatgpt_model = "gpt-4"
-if grammar_tool == "chatgpt3" or (do_check_grammar_again and grammar_tool2=="chatgpt3"):
-    import os
-    import openai
-    openai.api_key = os.getenv("OPENAI3_API_KEY")
-    chatgpt_model = "gpt-3.5-turbo" #"text-davinci-003"
 if grammar_tool == "caribe" or (do_check_grammar_again and grammar_tool2=="caribe"):
     import Caribe as cb    
 if grammar_tool == "language_tool" or (do_check_grammar_again and grammar_tool2=="language_tool"):
@@ -52,13 +42,6 @@ if grammar_tool == "language_tool" or (do_check_grammar_again and grammar_tool2=
 #-----------------------------------------------------------------------------                                              
 # Functions                                                                                                  
 #-----------------------------------------------------------------------------                                              
-def generate_chatgpt_response(prompt, model):
-    completion = openai.ChatCompletion.create(model=model, messages=[{"role": "user", "content": prompt}])
-    response = completion.choices[0].message.content
-
-    return response
-
-
 def check_grammar(input_sentence, grammar_tool="caribe", cap_and_punc=True, verbose=False):
     '''
     Check whether an input sentence has correct grammar according to a given grammar tool.
@@ -77,9 +60,9 @@ def check_grammar(input_sentence, grammar_tool="caribe", cap_and_punc=True, verb
         
 
     # Check grammar with ChatGPT
-    if grammar_tool == "chatgpt4" or grammar_tool == "chatgpt3":
+    if grammar_tool == "chatgpt":
         prompt = "Return just the number 1 if the following sentence is grammatically correct, or just the number 0 if it is not: '{0}'".format(input_sentence)
-        response = generate_chatgpt_response(prompt=prompt, model=chatgpt_model)
+        response = generate_chatgpt_response(prompt)
         if response == '1':
             is_correct = True
             if verbose:
@@ -118,14 +101,14 @@ def check_grammar(input_sentence, grammar_tool="caribe", cap_and_punc=True, verb
     return is_correct
 
 
-def check_grammar_twice(list_of_sentences, grammar_tool1="caribe", grammar_tool2="chatgpt4", 
+def check_grammar_twice(list_of_sentences, grammar_tool1="caribe", grammar_tool2="chatgpt", 
                         cap_and_punc=True, do_check_grammar_again=False, verbose=False):
     '''
     Check whether each input sentence in a list of sentences has correct grammar,
     according to one or two grammar tools.
     
     >>> list_of_sentences = ['language continue toys evolve', 'languages continue to evolve']
-    >>> check_grammar_twice(list_of_sentences, "caribe", "chatgpt4", True, True, True)
+    >>> check_grammar_twice(list_of_sentences, "caribe", "chatgpt", True, True, True)
           X (Caribe): Language continue toys evolve.
     CORRECT (Caribe): Languages continue to evolve.
     CORRECT (ChatGPT): Languages continue to evolve.
