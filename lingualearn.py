@@ -129,11 +129,12 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
             print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
 
 
-def type_text_to_match_spoken_text(input_text, ntries=None, verbose=False):
+def type_text_to_match_spoken_text(input_text, max_phonemes_per_word=25, ntries=None, verbose=False):
     '''
     Function for a user to type text to match spoken text.
 
     >>> input_text = 'Test'
+    >>> max_phonemes_per_word = 25
     >>> ntries = None 
     >>> verbose = False
     >>> type_text_to_match_spoken_text(input_text, ntries, verbose)
@@ -141,6 +142,30 @@ def type_text_to_match_spoken_text(input_text, ntries=None, verbose=False):
 
     print('\nListen...')
 
+    #--------------------------------------------------------------------------                                              
+    # Process input text
+    #--------------------------------------------------------------------------                                              
+    if ' ' in input_text.strip():
+        words = input_text.split()
+        nwords = len(words)
+    else:
+        words = input_text
+        nwords = 1
+
+    max_phonemes = nwords * max_phonemes_per_word
+
+    # Convert words to phonemes
+    phonemes, consonants, stresses, nsyllables = words_to_sounds(words, phoneme_list, consonant_list)
+
+    # Split up consonant compounds ("I scream" => "ice cream")
+    phonemes = separate_consonants(phonemes)
+ 
+    # Homophones with any number of words or syllables
+    homophones = generate_homophones(phonemes, max_phonemes, max_phonemes_per_word, False, False, None, None, nwords, nsyllables, None)
+
+    #--------------------------------------------------------------------------                                              
+    # Speak and prompt
+    #--------------------------------------------------------------------------                                              
     # Say the text
     text_to_speech(input_text)
 
@@ -159,7 +184,7 @@ def type_text_to_match_spoken_text(input_text, ntries=None, verbose=False):
             print('\nScore: {0}/{1}\n'.format(score, tries))
         else:
             tries += 1
-            if entered_text.strip().lower() == input_text.strip().lower():
+            if entered_text.strip().lower() in homophones:
                 score += 1
                 correct = True
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
@@ -335,11 +360,35 @@ duration = 3
 output_audio = 'tmp/output.wav'
 demo_all = True
 if demo_all:
+    print('\n==============================================================================================')
+    print('select_text_to_match_spoken_text', end='\n')
+    print('==============================================================================================')
     select_text_to_match_spoken_text(test1, nchoices, ntries, 25, None)
-    type_text_to_match_spoken_text(test2, ntries)
+    print('\n==============================================================================================')
+    print('type_text_to_match_spoken_text', end='\n')
+    print('==============================================================================================')
+    type_text_to_match_spoken_text(test2, 25, ntries)
+    print('\n==============================================================================================')
+    print('type_word_to_match_context', end='\n')
+    print('==============================================================================================')
     type_word_to_match_context(test3, 'definition', ntries)
+    print('\n==============================================================================================')
+    print('type_word_to_match_context', end='\n')
+    print('==============================================================================================')
     type_word_to_match_context(test4, 'synonym', ntries)
+    print('\n==============================================================================================')
+    print('type_word_to_match_context', end='\n')
+    print('==============================================================================================')
     type_word_to_match_context(test5, 'antonym', ntries)
+    print('\n==============================================================================================')
+    print('type_word_to_match_context', end='\n')
+    print('==============================================================================================')
     type_word_to_match_context(test6, 'jeopardy', ntries)
+    print('\n==============================================================================================')
+    print('type_word_in_a_sentence', end='\n')
+    print('==============================================================================================')
     type_word_in_a_sentence(test7, ntries)
+    print('\n==============================================================================================')
+    print('imitate_spoken_text', end='\n')
+    print('==============================================================================================')
     imitate_spoken_text(test8, duration, output_audio, ntries)
