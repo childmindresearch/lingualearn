@@ -35,6 +35,15 @@ def remove_duplicate_lines(infile, outfile):
     out = open(outfile, 'w').writelines(unique_lines)
 
 
+def display_header(input_text):
+    '''
+    Display text header.
+    '''
+    print('\n==============================================================================================')
+    print('{0}'.format(input_text), end='\n')
+    print('==============================================================================================')
+
+
 def display_save_output(input_list, input_name, input_text, 
                         do_save_files=False, filename_base=None, verbose=True):
     '''
@@ -66,3 +75,4 @@ def display_save_output(input_list, input_name, input_text,
     else:
         if verbose:
             print('\n0 {0} for "{1}"'.format(input_name, input_text), end='\n')
+

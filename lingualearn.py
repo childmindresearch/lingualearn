@@ -2,16 +2,106 @@
 '''                                                                                                                        
 Functions to test a user to match sounds with text.
 
+select_text_to_match_spoken_text()
+type_text_to_match_spoken_text()
+- Listen, then select or type matching text (smart version of Grapholearn)
+    - The app plays text-to-speech for letter(s), phoneme(s), or word(s).
+    - Users either select among text response options for a match 
+      with the spoken text, or users type the correct text.
+
+imitate_spoken_text()
+- Imitate sounds within or across languages.
+    - The app plays a sound (letter, phoneme, word, or sentence).
+    - Users repeat what they heard, imitating the sound.
+    - The app transcribes what the user said and checks if it is correct.
+
+type_word_to_match_context(): definition, synonym, antonym, or jeopardy
+- Type words that match definitions or other semantic clues
+    - The app presents a definition, synonym, antonym, or Jeopardy! question. 
+    - Users type the corresponding word.
+    - The app uses an LLM to check the word usage.
+
+type_word_in_a_sentence()
+- Use a word in a sentence.
+    - The app shows a word.
+    - Users use the word in a type-written sentence.
+    - The app uses an LLM to check the word usage.
+
 Copyright 2023, Arno Klein, MIT License
 
 '''
+import argparse
 import random
 
 from process_phonemes import phoneme_list, consonant_list, words_to_sounds, separate_consonants, generate_homophones
 from speak import text_to_speech
 from call_gpt import generate_chatgpt_response
 from speak import speech_to_text
+from io_files import display_header
 
+#-----------------------------------------------------------------------------                                              
+# Command-line arguments                                                                                               
+#-----------------------------------------------------------------------------                                              
+parser = argparse.ArgumentParser(description="""                                                                            
+                     Main program for a user to respond to individual language tasks.""",
+                     formatter_class = lambda prog:
+                     argparse.HelpFormatter(prog, max_help_position=40))
+parser.add_argument("-i", "--input_text", type=str, help='Enter text for demonstration purposes.')
+parser.add_argument("-n", "--number_attempts", type=int, help="Number of attempts permitted to respond to a question (default = None for infinite)", default=3)
+parser.add_argument("-sel", "--select_sound", type=int, help="Listen, then select matching text from specified number of response options (default number is 0 for off)", default=0)
+parser.add_argument("-typ", "--type_sound", action='store_true', help="Listen, then type matching text.")
+parser.add_argument("-imi", "--imitate_sound", action='store_true', help="Imitate sounds.")
+parser.add_argument("-def", "--match_definition", action='store_true', help="Type word that matches a definition.")
+parser.add_argument("-syn", "--match_synonym", action='store_true', help="Type word that matches a synonym.")
+parser.add_argument("-ant", "--match_antonym", action='store_true', help="Type word that matches an antonym.")
+parser.add_argument("-jeo", "--match_jeopardy", action='store_true', help="Type word that matches a Jeopardy! question.")
+parser.add_argument("-sen", "--type_sentence", action='store_true', help="Use a word in a sentence.")
+parser.add_argument("-q", "--quiet", action='store_true', help="Do not generate output on the command line")
+args = parser.parse_args()
+
+input_text = args.input_text
+ntries = args.number_attempts
+select_sound = args.select_sound
+type_sound = args.type_sound
+imitate_sound = args.imitate_sound
+match_definition = args.match_definition
+match_synonym = args.match_synonym
+match_antonym = args.match_antonym
+match_jeopardy = args.match_jeopardy
+type_sentence = args.type_sentence
+quiet = args.quiet
+
+do_input_text = False
+do_select_sound = False
+do_type_sound = False
+do_imitate_sound = False
+do_match_definition = False
+do_match_synonym = False
+do_match_antonym = False
+do_match_jeopardy = False
+do_type_sentence = False
+verbose = False
+if input_text:
+    do_input_text = True
+if select_sound:
+    do_select_sound = True
+    nchoices = select_sound
+if type_sound:
+    do_type_sound = True
+if imitate_sound:
+    do_imitate_sound = True
+if match_definition:
+    do_match_definition = True
+if match_synonym:
+    do_match_synonym = True
+if match_antonym:
+    do_match_antonym = True
+if match_jeopardy:
+    do_match_jeopardy = True
+if type_sentence:
+    do_type_sentence = True
+if quiet:
+    verbose = True
 
 #-----------------------------------------------------------------------------                                              
 # Functions                                                                                                  
@@ -20,6 +110,11 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
         max_phonemes_per_word=25, ignore_inputs=None, verbose=False):
     '''
     Function for a user to select text to match spoken text.
+
+    - Listen, then select matching text (smart version of Grapholearn)
+        - The app plays text-to-speech for letter(s), phoneme(s), or word(s).
+        - Users select among text response options for a match 
+          with the spoken text.
 
     >>> input_text = 'Test'
     >>> nchoices = 3
@@ -133,6 +228,10 @@ def type_text_to_match_spoken_text(input_text, max_phonemes_per_word=25, ntries=
     '''
     Function for a user to type text to match spoken text.
 
+    - Listen, then type matching text (smart version of Grapholearn)
+        - The app plays text-to-speech for letter(s), phoneme(s), or word(s).
+        - Users type the correct text.
+
     >>> input_text = 'Test'
     >>> max_phonemes_per_word = 25
     >>> ntries = None 
@@ -197,9 +296,66 @@ def type_text_to_match_spoken_text(input_text, max_phonemes_per_word=25, ntries=
             print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
 
 
+def imitate_spoken_text(input_text, duration=5, output_audio="tmp/output.wav", 
+                        ntries=None, verbose=False):
+    '''
+    Function for a user to imitate spoken text.
+
+    - Imitate sounds within or across languages.
+        - The app plays a sound (letter, phoneme, word, or sentence).
+        - Users repeat what they heard, imitating the sound.
+        - The app transcribes what the user said and checks if it is correct.
+
+    >>> input_text = 'Test'
+    >>> ntries = None 
+    >>> verbose = False
+    >>> imitate_spoken_text(input_text, ntries, verbose)
+    '''
+    # Play spoken text
+    print('\nListen...')
+    text_to_speech(input_text)
+    print('\nRepeat exactly what you just heard as you record the audio below...')
+
+    # Record and transcribe the user's speech
+    output_text = speech_to_text(duration, output_audio)
+
+    # Loop until user exits, says the correct answer, or reaches ntries                                              
+    score = 0
+    tries = 0
+    correct = False
+    while correct == False:
+
+        if not output_text:
+            correct = True
+            print('\nScore: {0}/{1}\n'.format(score, tries))
+        else: 
+            tries += 1
+        
+            # Check imitation using speech-to-text
+            if output_text == input_text:
+                correct = True
+                score += 1
+                print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
+            elif ntries and tries < ntries:
+                print('\nTry again. This is what speech-to-text interpreted from what you said:\n"{0}"'.format(output_text))
+                text_to_speech(input_text)
+                output_text = speech_to_text(duration, output_audio)
+
+        if correct == False and ntries and tries == ntries:
+            correct = True   
+            print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
+
+
 def type_word_to_match_context(word, context='definition', ntries=None, verbose=False):
     '''
     Function for a user to type a word to match a definition, synonym, antonym, or Jeopardy!-style description.
+
+    type_word_to_match_context(): definition, synonym, antonym, or jeopardy
+    - Type words that match definitions or other semantic clues
+        - The app presents a definition, synonym, antonym, or Jeopardy!-style 
+        description for a word.
+        - Users type the corresponding word.
+        - The app uses an LLM to check the word usage.
 
     >>> word = 'Test'
     >>> context = 'definition'
@@ -261,6 +417,11 @@ def type_word_in_a_sentence(word, ntries=None, verbose=False):
     '''
     Function for a user to type a word in a sentence.
 
+    - Use a word in a sentence.
+        - The app shows a word.
+        - Users use the word in a type-written sentence.
+        - The app uses an LLM to check the word usage.
+
     >>> word = 'Test'
     >>> ntries = None 
     >>> verbose = False
@@ -298,97 +459,54 @@ def type_word_in_a_sentence(word, ntries=None, verbose=False):
             print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
 
 
-def imitate_spoken_text(input_text, duration=5, output_audio="tmp/output.wav", 
-                        ntries=None, verbose=False):
-    '''
-    Function for a user to imitate spoken text.
-
-    >>> input_text = 'Test'
-    >>> ntries = None 
-    >>> verbose = False
-    >>> imitate_spoken_text(input_text, ntries, verbose)
-    '''
-    # Play spoken text
-    print('\nListen...')
-    text_to_speech(input_text)
-    print('\nRepeat exactly what you just heard as you record the audio below...')
-
-    # Record and transcribe the user's speech
-    output_text = speech_to_text(duration, output_audio)
-
-    # Loop until user exits, says the correct answer, or reaches ntries                                              
-    score = 0
-    tries = 0
-    correct = False
-    while correct == False:
-
-        if not output_text:
-            correct = True
-            print('\nScore: {0}/{1}\n'.format(score, tries))
-        else: 
-            tries += 1
-        
-            # Check imitation using speech-to-text
-            if output_text == input_text:
-                correct = True
-                score += 1
-                print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
-            elif ntries and tries < ntries:
-                print('\nTry again. This is what speech-to-text interpreted from what you said:\n"{0}"'.format(output_text))
-                text_to_speech(input_text)
-                output_text = speech_to_text(duration, output_audio)
-
-        if correct == False and ntries and tries == ntries:
-            correct = True   
-            print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
-
-
 #-----------------------------------------------------------------------------                                              
 # Demo                                                                                                  
 #-----------------------------------------------------------------------------                                              
-test1 = 'one'
-test2 = 'two'
-test3 = 'bicycle'
-test4 = 'thin'
-test5 = 'deep'
-test6 = 'six'
-test7 = 'gigantic'
-test8 = 'wash rinse and repeat'
-nchoices = 5
-ntries = 3
-duration = 3
-output_audio = 'tmp/output.wav'
-demo_all = True
-if demo_all:
-    print('\n==============================================================================================')
-    print('select_text_to_match_spoken_text', end='\n')
-    print('==============================================================================================')
-    select_text_to_match_spoken_text(test1, nchoices, ntries, 25, None)
-    print('\n==============================================================================================')
-    print('type_text_to_match_spoken_text', end='\n')
-    print('==============================================================================================')
-    type_text_to_match_spoken_text(test2, 25, ntries)
-    print('\n==============================================================================================')
-    print('type_word_to_match_context', end='\n')
-    print('==============================================================================================')
-    type_word_to_match_context(test3, 'definition', ntries)
-    print('\n==============================================================================================')
-    print('type_word_to_match_context', end='\n')
-    print('==============================================================================================')
-    type_word_to_match_context(test4, 'synonym', ntries)
-    print('\n==============================================================================================')
-    print('type_word_to_match_context', end='\n')
-    print('==============================================================================================')
-    type_word_to_match_context(test5, 'antonym', ntries)
-    print('\n==============================================================================================')
-    print('type_word_to_match_context', end='\n')
-    print('==============================================================================================')
-    type_word_to_match_context(test6, 'jeopardy', ntries)
-    print('\n==============================================================================================')
-    print('type_word_in_a_sentence', end='\n')
-    print('==============================================================================================')
-    type_word_in_a_sentence(test7, ntries)
-    print('\n==============================================================================================')
-    print('imitate_spoken_text', end='\n')
-    print('==============================================================================================')
-    imitate_spoken_text(test8, duration, output_audio, ntries)
+if do_select_sound:
+    if verbose:
+        display_header('select_text_to_match_spoken_text()')
+    if not do_input_text:
+        input_text = 'pair'
+    select_text_to_match_spoken_text(input_text, nchoices, ntries, 25, None)
+if do_type_sound:
+    if verbose:
+        display_header('type_text_to_match_spoken_text()')
+    if not do_input_text:
+        input_text = 'pair'
+    type_text_to_match_spoken_text(input_text, 25, ntries)
+if do_imitate_sound:
+    if verbose:
+        display_header('imitate_spoken_text()')
+    if not do_input_text:
+        input_text = 'bicycle'
+    imitate_spoken_text(input_text, duration=5, output_audio="tmp/output.wav", ntries=ntries)
+if do_match_definition:
+    if verbose:
+        display_header('type_word_to_match_context(): definition')
+    if not do_input_text:
+        input_text = 'balloon'
+    type_word_to_match_context(input_text, 'definition', ntries)
+if do_match_synonym:
+    if verbose:
+        display_header('type_word_to_match_context(): synonym')
+    if not do_input_text:
+        input_text = 'thin'
+    type_word_to_match_context(input_text, 'synonym', ntries)
+if do_match_antonym:
+    if verbose:
+        display_header('type_word_to_match_context(): antonym')
+    if not do_input_text:
+        input_text = 'deep'
+    type_word_to_match_context(input_text, 'antonym', ntries)
+if do_match_jeopardy:
+    if verbose:
+        display_header('type_word_to_match_context(): jeopardy')
+    if not do_input_text:
+        input_text = 'six'
+    type_word_to_match_context(input_text, 'jeopardy', ntries)
+if do_type_sentence:
+    if verbose:
+        display_header('type_word_in_a_sentence()')
+    if not do_input_text:
+        input_text = 'huge'
+    type_word_in_a_sentence(input_text, ntries)
