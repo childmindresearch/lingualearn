@@ -59,7 +59,7 @@ parser.add_argument("-syn", "--match_synonym", action='store_true', help="Type w
 parser.add_argument("-ant", "--match_antonym", action='store_true', help="Type word that matches an antonym.")
 parser.add_argument("-jeo", "--match_jeopardy", action='store_true', help="Type word that matches a Jeopardy! question.")
 parser.add_argument("-sen", "--type_sentence", action='store_true', help="Use a word in a sentence.")
-parser.add_argument("-q", "--quiet", action='store_true', help="Do not generate output on the command line")
+parser.add_argument("-q", "--quiet", action='store_true', help="Show minimal output on the command line.")
 args = parser.parse_args()
 
 input_text = args.input_text
