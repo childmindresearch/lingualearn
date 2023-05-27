@@ -3,7 +3,10 @@
 The Linguamorph software was created by Arno Klein (binarybottle.com) 
 and is intended to process/morph language, including variations in sound and stress.
 
-Potential applications include:
+LinguaLearn language learning tools are the primary intended application
+(see documentation at the top of the command-line program lingualearn.py).
+
+Other potential applications include:
 
   - homophone phrases (variations that sound the same or similar)
   - extreme alliteration
@@ -20,11 +23,7 @@ Potential applications include:
 
 ## Phonemes and Carnegie Mellon Pronouncing Dictionary
 
-http://www.speech.cs.cmu.edu/cgi-bin/cmudict
-
-https://github.com/cmusphinx/cmudict/tree/4c6a365cea2c34340ffc218d5af7a38920fa7e37
-
-https://www.internationalphoneticalphabet.org/ipa-sounds/ipa-chart-with-sounds/
+For this software, we make use of different dictionaries as lexicons, but make primary use of [CMU's Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) [github](https://github.com/cmusphinx/cmudict/tree/4c6a365cea2c34340ffc218d5af7a38920fa7e37]). See below and the documents/ folder for more information about this dictionary:
 
 From https://www.nltk.org/_modules/nltk/corpus/reader/cmudict.html:
 
@@ -49,7 +48,8 @@ Phonemes: There are 39 phonemes (more at https://en.wikipedia.org/wiki/ARPABET):
     AW      cow     K AW           AY      hide    HH AY D
     B       be      B IY           CH      cheese  CH IY Z
     D       dee     D IY           DH      thee    DH IY
-    EH      Ed      EH D           ER      hurt    HH ER T  -- CHANGE:    ER      hurt    HH ER R T
+    EH      Ed      EH D           ER      hurt    HH ER T  
+    -- CHANGE:                     ER      hurt    HH ER R T
     EY      ate     EY T           F       fee     F IY
     G       green   G R IY N       HH      he      HH IY
     IH      it      IH T           IY      eat     IY T
@@ -66,5 +66,4 @@ Phonemes: There are 39 phonemes (more at https://en.wikipedia.org/wiki/ARPABET):
     ZH      seizure S IY ZH ER
     
 From https://www.pythonstudio.us/language-processing/a-pronouncing-dictionary.html:
-
-For each word, this lexicon provides a list of phonetic codes—distinct labels for each contrastive sound—known as phones. Observe that fire has two pronunciations (in U.S. English): the one-syllable F AY1 R, and the two-syllable F AY1 ER0. The symbols in the CMU Pronouncing Dictionary are from the Arpabet, described in more detail at http://en.wikipedia.org/wiki/Arpabet.
+For each word, this lexicon provides a list of phonetic codes — distinct labels for each contrastive sound — known as phones. Observe that fire has two pronunciations (in U.S. English): the one-syllable F AY1 R, and the two-syllable F AY1 ER0. The symbols in the CMU Pronouncing Dictionary are from the Arpabet, described in more detail at http://en.wikipedia.org/wiki/Arpabet.
