@@ -1,12 +1,14 @@
 #!/usr/bin/env python                                                                                                       
 '''                                                                                                                        
-Main program to run Linguamorph software (see README.md).
+Main program to run Linguamorph language morphing software.
+
+- See lingualearn.py for the LinguaLearn language learning application.
+- See the README.md file for more information about phonemes.
 
 Copyright 2023, Arno Klein, MIT License
 
 '''
 import argparse
-import re
 from process_phonemes import phoneme_list, consonant_list, words_to_sounds, separate_consonants, generate_homophones
 from check_grammar import check_grammar_twice, grammar_tool, grammar_tool2
 from io_files import display_save_output
@@ -24,7 +26,7 @@ parser.add_argument("-s", "--speak", action='store_true', help="Say the input te
 parser.add_argument("-mh", "--make_homophones", action='store_true', help="Make homophones (same sounds)")
 parser.add_argument("-mc", "--make_consonances", action='store_true', help="Make consonances (same consonants)")
 parser.add_argument("-mp", "--make_permutations", action='store_true', help="Make consonant permutations")
-parser.add_argument("-l", "--limit", type=str, help="Limit the number of words ('words') or syllables ('syllables')")
+parser.add_argument("-l", "--limit", type=str, help="Limit the number of words ('words') or syllables ('syllables') or both ('both')")
 parser.add_argument("-g", "--grammar", type=int, help="Check grammar (0=no (default), 1=once, 2=twice)", default=0)
 parser.add_argument("-o", "--output", action='store_true', help="Save output files")
 parser.add_argument("-q", "--quiet", action='store_true', help="Do not generate output on the command line")
