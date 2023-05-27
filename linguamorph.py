@@ -150,6 +150,3 @@ if do_permute_consonants:
     if do_grammar:
         swap_consonants = check_grammar_twice(consonances, grammar_tool, grammar_tool2, cap_and_punc, do_check_grammar_again, verbose2)
     display_save_output(swap_consonants, 'swap_consonances', input_text, do_save, filename_base, verbose)
-
-if verbose:
-    print('\nDone')

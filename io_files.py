@@ -53,12 +53,10 @@ def display_save_output(input_list, input_name, input_text,
     # Write output to a text file
     if input_list:
         if verbose:
-            print('')
-            print('==============================================================================================')
-            print('{0}: {1} for "{2}"'.format(input_name, len(input_list), input_text), end='\n')
-            print('==============================================================================================')
+            display_header(input_name)
             for line in input_list:
                print('    {0}'.format(line), end='\n')
+            print('\n{0}: {1} for "{2}"\n'.format(input_name, len(input_list), input_text), end='\n')
         if do_save_files:
             if not filename_base.endswith("."):
                 filename_base += "."
@@ -71,8 +69,8 @@ def display_save_output(input_list, input_name, input_text,
                 fwrite.write(new_line + '\n')
             fwrite.close()
             if verbose:
-                print('\n{0}: {1} written to {2}'.format(input_name, len(input_list), outfile), end='\n')
+                print('\n{0}: {1} written to {2}\n'.format(input_name, len(input_list), outfile), end='\n')
     else:
         if verbose:
-            print('\n0 {0} for "{1}"'.format(input_name, input_text), end='\n')
+            print('\n0 {0} for "{1}"\n'.format(input_name, input_text), end='\n')
 
