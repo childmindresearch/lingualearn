@@ -6,26 +6,26 @@ Ex: python lingualearn.py -i pair -n 3 -sel 5 -typ -imi 3 -def -syn -ant -jeo -s
 
 -sel [number of response options (int)]: select_text_to_match_spoken_text()
 -typ: type_text_to_match_spoken_text()
-- Listen, then select or type matching text (smart version of Grapholearn)
+Listen, then select or type matching text.
     - The app plays text-to-speech for letter(s), phoneme(s), or word(s).
     - Users either select among text response options for a match 
       with the spoken text, or users type the correct text.
 
 -imi [recording duration in seconds (int)]: imitate_spoken_text()
-- Imitate sounds within or across languages.
+Listen, then imitate.
     - The app plays a sound (letter, phoneme, word, or sentence).
     - Users repeat what they heard, imitating the sound.
     - The app transcribes what the user said and checks if it is correct.
 
 type_word_to_match_context()
 -def: definition, -syn: synonym, -ant: antonym, or -jeo: jeopardy
-- Type words that match definitions or other semantic clues
+Type a word that matches a definition or other semantic clues
     - The app presents a definition, synonym, antonym, or Jeopardy! question. 
     - Users type the corresponding word.
     - The app uses an LLM to check the word usage.
 
 -sen: type_word_in_a_sentence()
-- Use a word in a sentence.
+Use a word in a sentence.
     - The app shows a word.
     - Users use the word in a type-written sentence.
     - The app uses an LLM to check the word usage.
@@ -117,7 +117,7 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
     '''
     Function for a user to select text to match spoken text.
 
-    - Listen, then select matching text (smart version of Grapholearn)
+    Listen, then select matching text.
         - The app plays text-to-speech for letter(s), phoneme(s), or word(s).
         - Users select among text response options for a match 
           with the spoken text.
@@ -209,7 +209,7 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
             if morphs[ichoice] == input_text:
                 icorrect = ichoice
             ichoice += 1
-        nchoice = input('\nEnter the number (or Return to exit): ')
+        nchoice = input('\nEnter the number: ')
 
         # Feedback
         if not nchoice:
@@ -234,7 +234,7 @@ def type_text_to_match_spoken_text(input_text, max_phonemes_per_word=25, ntries=
     '''
     Function for a user to type text to match spoken text.
 
-    - Listen, then type matching text (smart version of Grapholearn)
+    Listen, then type matching text.
         - The app plays text-to-speech for letter(s), phoneme(s), or word(s).
         - Users type the correct text.
 
@@ -275,7 +275,7 @@ def type_text_to_match_spoken_text(input_text, max_phonemes_per_word=25, ntries=
     text_to_speech(input_text)
 
     # Prompt the user for text
-    entered_text = input('\nType what you heard (or Return to exit): ')
+    entered_text = input('\nType what you heard: ')
 
     # Loop until user exits, types in the correct answer, or reaches ntries
     score = 0
@@ -307,7 +307,7 @@ def imitate_spoken_text(input_text, duration=3, output_audio="tmp/output.wav",
     '''
     Function for a user to imitate spoken text.
 
-    - Imitate sounds within or across languages.
+    Listen, then imitate.
         - The app plays a sound (letter, phoneme, word, or sentence).
         - Users repeat what they heard, imitating the sound.
         - The app transcribes what the user said and checks if it is correct.
@@ -355,9 +355,8 @@ def imitate_spoken_text(input_text, duration=3, output_audio="tmp/output.wav",
 def type_word_to_match_context(word, context='definition', ntries=None, verbose=False):
     '''
     Function for a user to type a word to match a definition, synonym, antonym, or Jeopardy!-style description.
-
-    type_word_to_match_context(): definition, synonym, antonym, or jeopardy
-    - Type words that match definitions or other semantic clues
+ 
+    Type a word that matches a definition or other semantic clues.
         - The app presents a definition, synonym, antonym, or Jeopardy!-style 
         description for a word.
         - Users type the corresponding word.
@@ -423,7 +422,7 @@ def type_word_in_a_sentence(word, ntries=None, verbose=False):
     '''
     Function for a user to type a word in a sentence.
 
-    - Use a word in a sentence.
+    Use a word in a sentence.
         - The app shows a word.
         - Users use the word in a type-written sentence.
         - The app uses an LLM to check the word usage.
@@ -470,49 +469,49 @@ def type_word_in_a_sentence(word, ntries=None, verbose=False):
 #-----------------------------------------------------------------------------                                              
 if do_select_sound:
     if verbose:
-        display_header('select_text_to_match_spoken_text()')
+        display_header('Listen, then select matching text: select_text_to_match_spoken_text()')
     if not do_input_text:
         input_text = 'pair'
     select_text_to_match_spoken_text(input_text, nchoices, ntries, 25, None)
 if do_type_sound:
     if verbose:
-        display_header('type_text_to_match_spoken_text()')
+        display_header('Listen, then type matching text: type_text_to_match_spoken_text()')
     if not do_input_text:
         input_text = 'pair'
     type_text_to_match_spoken_text(input_text, 25, ntries)
 if do_imitate_sound:
     if verbose:
-        display_header('imitate_spoken_text()')
+        display_header('Imitate sounds: imitate_spoken_text()')
     if not do_input_text:
         input_text = 'bicycle'
     imitate_spoken_text(input_text, duration, output_audio, ntries)
 if do_match_definition:
     if verbose:
-        display_header('type_word_to_match_context(): definition')
+        display_header('Type a word that matches a definition: type_word_to_match_context(): definition')
     if not do_input_text:
         input_text = 'balloon'
     type_word_to_match_context(input_text, 'definition', ntries)
 if do_match_synonym:
     if verbose:
-        display_header('type_word_to_match_context(): synonym')
+        display_header('Type a word that matches synonyms: type_word_to_match_context(): synonym')
     if not do_input_text:
         input_text = 'thin'
     type_word_to_match_context(input_text, 'synonym', ntries)
 if do_match_antonym:
     if verbose:
-        display_header('type_word_to_match_context(): antonym')
+        display_header('Type a word that matches antonyms: type_word_to_match_context(): antonym')
     if not do_input_text:
         input_text = 'deep'
     type_word_to_match_context(input_text, 'antonym', ntries)
 if do_match_jeopardy:
     if verbose:
-        display_header('type_word_to_match_context(): jeopardy')
+        display_header('Type a word that matches a Jeopardy! question: type_word_to_match_context(): jeopardy')
     if not do_input_text:
         input_text = 'six'
     type_word_to_match_context(input_text, 'jeopardy', ntries)
 if do_type_sentence:
     if verbose:
-        display_header('type_word_in_a_sentence()')
+        display_header('Use a word in a sentence: type_word_in_a_sentence()')
     if not do_input_text:
         input_text = 'huge'
     type_word_in_a_sentence(input_text, ntries)
