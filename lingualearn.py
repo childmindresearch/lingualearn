@@ -2,7 +2,7 @@
 '''                                                                                                                        
 Main program for a user to respond to individual language tasks.
 
-Ex: python lingualearn.py -i pair -n 3 -sel 5 -typ -imi 3 -def -syn -ant -jeo -sen
+Ex: python lingualearn.py -i pair -n 3 -sel 5 -typ -imi 3 -def -syn -ant -jeo -sen -use 3
 
 -sel [number of response options (int)]: select_text_to_match_spoken_text()
 -typ: type_text_to_match_spoken_text()
@@ -25,9 +25,10 @@ Type a word that matches a definition or other semantic clues
     - The app uses an LLM to check the word usage.
 
 -sen: type_word_in_a_sentence()
-Use a word in a sentence.
-    - The app shows a word.
-    - Users use the word in a type-written sentence.
+-use: say_word_in_a_sentence()
+Use a word in a typed or spoken sentence.
+    - The app shows or sayse a word.
+    - Users use the word in a type-written or spoken sentence.
     - The app uses an LLM to check the word usage.
 
 Copyright 2023, Arno Klein, MIT License
@@ -578,11 +579,11 @@ if do_type_sentence:
     if verbose:
         display_header('Use a word in a typed sentence: type_word_in_a_sentence()')
     if not do_input_text:
-        input_text = 'huge'
+        input_text = 'beetle'
     type_word_in_a_sentence(input_text, ntries)
 if do_use_word:
     if verbose:
         display_header('Use a word in a spoken sentence: say_word_in_a_sentence()')
     if not do_input_text:
-        input_text = 'giant'
+        input_text = 'butterfly'
     say_word_in_a_sentence(input_text, duration2, output_audio, ntries)
