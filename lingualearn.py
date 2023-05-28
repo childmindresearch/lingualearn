@@ -26,9 +26,9 @@ Type a word that matches a definition or other semantic clues
 
 -sen: type_word_in_a_sentence()
 -use: say_word_in_a_sentence()
-Use a word in a typed or spoken sentence.
-    - The app shows or sayse a word.
-    - Users use the word in a type-written or spoken sentence.
+Use a word in a sentence.
+    - The app shows or says a word.
+    - Users use the word in a typed or spoken sentence.
     - The app uses an LLM to check the word usage.
 
 Copyright 2023, Arno Klein, MIT License
