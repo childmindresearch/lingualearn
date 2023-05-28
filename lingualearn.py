@@ -49,29 +49,31 @@ parser = argparse.ArgumentParser(description="""
                      Main program for a user to respond to individual language tasks.""",
                      formatter_class = lambda prog:
                      argparse.HelpFormatter(prog, max_help_position=40))
-parser.add_argument("-i", "--input_text", type=str, help='Enter text for demonstration purposes.')
-parser.add_argument("-n", "--number_attempts", type=int, help="Number of attempts permitted to respond to a question (default = None for infinite)", default=3)
-parser.add_argument("-sel", "--select_sound", type=int, help="Listen, then select matching text from specified number of response options (default number is 0 for off)", default=0)
-parser.add_argument("-typ", "--type_sound", action='store_true', help="Listen, then type matching text.")
-parser.add_argument("-imi", "--imitate_sound", type=int, help="Imitate sounds for a specified number of seconds (default number is 0 for off)", default=0)
+parser.add_argument("-i", "--input", type=str, help='Input text for demonstration purposes.')
+parser.add_argument("-n", "--number", type=int, help="Number of mistakes allowed (default: 3).", default=3)
+parser.add_argument("-sel", "--select", type=int, help="Listen then select text from [int] options.", default=0)
+parser.add_argument("-imi", "--imitate", type=int, help="Listen then imitate for [int] seconds.", default=0)
+parser.add_argument("-typ", "--type", action='store_true', help="Listen, then type matching text.")
 parser.add_argument("-def", "--match_definition", action='store_true', help="Type word that matches a definition.")
 parser.add_argument("-syn", "--match_synonym", action='store_true', help="Type word that matches a synonym.")
 parser.add_argument("-ant", "--match_antonym", action='store_true', help="Type word that matches an antonym.")
 parser.add_argument("-jeo", "--match_jeopardy", action='store_true', help="Type word that matches a Jeopardy! question.")
-parser.add_argument("-sen", "--type_sentence", action='store_true', help="Use a word in a sentence.")
+parser.add_argument("-sen", "--type_sentence", action='store_true', help="Use word in a typed sentence.")
+parser.add_argument("-use", "--use_word", type=int, help="Listen then say word in a sentence in [int] seconds.", default=0)
 parser.add_argument("-q", "--quiet", action='store_true', help="Show minimal output on the command line.")
 args = parser.parse_args()
 
-input_text = args.input_text
-ntries = args.number_attempts
-select_sound = args.select_sound
-type_sound = args.type_sound
-imitate_sound = args.imitate_sound
+input_text = args.input
+ntries = args.number
+select_sound = args.select
+type_sound = args.type
+imitate_sound = args.imitate
 match_definition = args.match_definition
 match_synonym = args.match_synonym
 match_antonym = args.match_antonym
 match_jeopardy = args.match_jeopardy
 type_sentence = args.type_sentence
+use_word = args.use_word
 quiet = args.quiet
 
 do_input_text = False
@@ -83,6 +85,7 @@ do_match_synonym = False
 do_match_antonym = False
 do_match_jeopardy = False
 do_type_sentence = False
+do_use_word = False
 verbose = True
 if input_text:
     do_input_text = True
@@ -93,7 +96,7 @@ if type_sound:
     do_type_sound = True
 if imitate_sound:
     do_imitate_sound = True
-    duration = imitate_sound
+    duration1 = imitate_sound
 if match_definition:
     do_match_definition = True
 if match_synonym:
@@ -104,6 +107,9 @@ if match_jeopardy:
     do_match_jeopardy = True
 if type_sentence:
     do_type_sentence = True
+if use_word:
+    do_use_word = True
+    duration2 = use_word
 if quiet:
     verbose = False
 
@@ -222,7 +228,7 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
                 correct = True
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
             elif ntries and tries < ntries:
-                print('\nTry again!\n')
+                print('\Please try again!\n')
                 text_to_speech(input_text)
 
         if correct == False and ntries and tries == ntries:
@@ -295,7 +301,7 @@ def type_text_to_match_spoken_text(input_text, max_phonemes_per_word=25, ntries=
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
             elif ntries and tries < ntries:
                 text_to_speech(input_text)
-                entered_text = input('\nTry again: ')
+                entered_text = input('\nPlease try again: ')
 
         if correct == False and ntries and tries == ntries:
             correct = True   
@@ -313,9 +319,11 @@ def imitate_spoken_text(input_text, duration=3, output_audio="tmp/output.wav",
         - The app transcribes what the user said and checks if it is correct.
 
     >>> input_text = 'Test'
+    >>> duration = 3
+    >>> output_audio = "tmp/output.wav"
     >>> ntries = None 
     >>> verbose = False
-    >>> imitate_spoken_text(input_text, ntries, verbose)
+    >>> imitate_spoken_text(input_text, duration, output_audio, ntries, verbose)
     '''
     # Play spoken text
     print('\nListen...')
@@ -343,7 +351,7 @@ def imitate_spoken_text(input_text, duration=3, output_audio="tmp/output.wav",
                 score += 1
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
             elif ntries and tries < ntries:
-                print('\nTry again. This is what speech-to-text interpreted from what you said:\n"{0}"'.format(output_text))
+                print('\nPlease try again. This is what speech-to-text interpreted from what you said:\n"{0}"'.format(output_text))
                 text_to_speech(input_text)
                 output_text = speech_to_text(duration, output_audio)
 
@@ -366,7 +374,7 @@ def type_word_to_match_context(word, context='definition', ntries=None, verbose=
     >>> context = 'definition'
     >>> ntries = None 
     >>> verbose = False
-    >>> type_word_to_match_definition(word, ntries, verbose)
+    >>> type_word_to_match_context(word, context, ntries, verbose)
     '''
 
     if context == 'definition':
@@ -411,7 +419,7 @@ def type_word_to_match_context(word, context='definition', ntries=None, verbose=
                 correct = True
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
             elif ntries and tries < ntries:
-                entered_word = input('\nTry again: ')
+                entered_word = input('\nPlease try again: ')
 
         if correct == False and ntries and tries == ntries:
             correct = True   
@@ -422,7 +430,7 @@ def type_word_in_a_sentence(word, ntries=None, verbose=False):
     '''
     Function for a user to type a word in a sentence.
 
-    Use a word in a sentence.
+    Type a word in a sentence.
         - The app shows a word.
         - Users use the word in a type-written sentence.
         - The app uses an LLM to check the word usage.
@@ -457,7 +465,64 @@ def type_word_in_a_sentence(word, ntries=None, verbose=False):
             elif response == '2' and ntries and tries < ntries:
                 entered_text = input('\nPlease try again, using the word in a way that conveys its meaning: ')
             elif ntries and tries < ntries:
-                entered_text = input('\nTry again: ')
+                entered_text = input('\nPlease try again: ')
+
+        if correct == False and ntries and tries == ntries:
+            correct = True   
+            print('\nToo many attempts. Score: {0}/{1}\n'.format(score, tries))
+
+
+def say_word_in_a_sentence(word, duration=3, output_audio="tmp/output.wav", 
+                           ntries=None, verbose=False):
+    '''
+    Function for a user to say a word in a sentence.
+
+    Say a word in a sentence.
+        - The app says a word.
+        - Users use the word in a spoken sentence.
+        - The app uses an LLM to check the word usage.
+
+    >>> input_text = 'Test'
+    >>> duration = 3
+    >>> output_audio = "tmp/output.wav"
+    >>> ntries = None 
+    >>> verbose = False
+    >>> say_word_in_a_sentence(input_text, duration, output_audio, ntries, verbose)
+    '''
+    # Play spoken text
+    print('\nListen...')
+    text_to_speech(word)
+    print('\nUse the word you just heard in a sentence as you record the audio below...')
+
+    # Record and transcribe the user's speech
+    output_text = speech_to_text(duration, output_audio)
+
+    # Loop until user exits, says the correct answer, or reaches ntries                                              
+    score = 0
+    tries = 0
+    correct = False
+    while correct == False:
+
+        if not output_text:
+            correct = True
+            print('\nScore: {0}/{1}\n'.format(score, tries))
+        else: 
+            tries += 1
+           
+            # Check word usage using ChatGPT
+            prompt = 'Return just the number 1 if SENTENCE uses the word "{0}" appropriately, or just the number 0 if it does not. If SENTENCE uses the word in a trivial manner, like "{0} is a word with {1} letters." return just the number 2. SENTENCE is: "{2}"'.format(word, len(word), output_text)
+            response = generate_chatgpt_response(prompt)
+            if response == '1':
+                correct = True
+                score += 1
+                print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
+            elif ntries and tries < ntries:
+                if response == '2':
+                    print('\nPlease try again, using the word in a way that conveys its meaning: ')
+                else:
+                    print('\nPlease try again...')
+                text_to_speech(word)
+                output_text = speech_to_text(duration, output_audio)
 
         if correct == False and ntries and tries == ntries:
             correct = True   
@@ -484,7 +549,7 @@ if do_imitate_sound:
         display_header('Imitate sounds: imitate_spoken_text()')
     if not do_input_text:
         input_text = 'bicycle'
-    imitate_spoken_text(input_text, duration, output_audio, ntries)
+    imitate_spoken_text(input_text, duration1, output_audio, ntries)
 if do_match_definition:
     if verbose:
         display_header('Type a word that matches a definition: type_word_to_match_context(): definition')
@@ -511,7 +576,13 @@ if do_match_jeopardy:
     type_word_to_match_context(input_text, 'jeopardy', ntries)
 if do_type_sentence:
     if verbose:
-        display_header('Use a word in a sentence: type_word_in_a_sentence()')
+        display_header('Use a word in a typed sentence: type_word_in_a_sentence()')
     if not do_input_text:
         input_text = 'huge'
     type_word_in_a_sentence(input_text, ntries)
+if do_use_word:
+    if verbose:
+        display_header('Use a word in a spoken sentence: say_word_in_a_sentence()')
+    if not do_input_text:
+        input_text = 'giant'
+    say_word_in_a_sentence(input_text, duration2, output_audio, ntries)
