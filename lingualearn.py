@@ -229,7 +229,7 @@ def select_text_to_match_spoken_text(input_text, nchoices=3, ntries=None,
                 correct = True
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
             elif ntries and tries < ntries:
-                print('\Please try again!\n')
+                print('Please try again!\n')
                 text_to_speech(input_text)
 
         if correct == False and ntries and tries == ntries:
@@ -519,7 +519,7 @@ def say_word_in_a_sentence(word, duration=3, output_audio="tmp/output.wav",
                 print('\nCorrect! Score: {0}/{1}\n'.format(score, tries))
             elif ntries and tries < ntries:
                 if response == '2':
-                    print('\nPlease try again, using the word in a way that conveys its meaning: ')
+                    print('\nPlease try again, using the word in a way that conveys its meaning...')
                 else:
                     print('\nPlease try again...')
                 text_to_speech(word)
