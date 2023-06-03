@@ -2,6 +2,8 @@
 '''                                                                                                                        
 Main program to run Linguamorph language morphing software.
 
+Ex: python linguamorph.py -mh 'pair of shoes' -l words
+
 - See lingualearn.py for the LinguaLearn language learning application.
 - See the README.md file for more information about phonemes.
 
