@@ -98,10 +98,10 @@ def simplify_reading_level(input_text, max_level="6", max_loops=5, verbose=False
             #if verbose:
             #    print("The reading level is at or below grade {0}.".format(max_level))
         else:
-            prompt = "Return a simplified version of the following text that is at or below a reading level of school grade {0}: '{1}'".format(max_level, response)
+            prompt = 'Return a simplified version of the following text that is at or below a reading level of school grade {0}: {1}'.format(max_level, response)
             response = generate_chatgpt_response(prompt)
             if verbose:
-                print("{0}".format(response))
+                print('"{0}"'.format(response))
             level = check_reading_level(response, verbose)
 
 #-----------------------------------------------------------------------------                                              
@@ -109,7 +109,7 @@ def simplify_reading_level(input_text, max_level="6", max_loops=5, verbose=False
 #-----------------------------------------------------------------------------                                              
 if verbose:
     display_header('Simplify text to be at or below reading level grade {0}.'.format(max_level))
-    print(input_text)
 if not do_input_text:
     input_text = "The sartorial maestro utilizes quotidien phraseology."
+print('"' + input_text + '"')
 simplify_reading_level(input_text, max_level, max_loops, verbose)
