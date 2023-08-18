@@ -26,3 +26,4 @@ def generate_chatgpt_response(prompt, model=gpt_model):
     response = completion.choices[0].message.content
 
     return response
+

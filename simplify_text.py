@@ -104,6 +104,8 @@ def simplify_reading_level(input_text, max_level="6", max_loops=5, verbose=False
                 print('"{0}"'.format(response))
             level = check_reading_level(response, verbose)
 
+    return response
+
 #-----------------------------------------------------------------------------                                              
 # Demo                                                                                                  
 #-----------------------------------------------------------------------------                                              
@@ -112,4 +114,4 @@ if verbose:
 if not do_input_text:
     input_text = "The sartorial maestro utilizes quotidien phraseology."
 print('"' + input_text + '"')
-simplify_reading_level(input_text, max_level, max_loops, verbose)
+response = simplify_reading_level(input_text, max_level, max_loops, verbose)
