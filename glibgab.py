@@ -2,7 +2,7 @@
 '''                                                                                                                        
 Spoken and visual twist on the original Mad Lib game.
 
-Use Google text-to-speech and speech-to-text, ChatGPT, and Dall-E.
+Use Google text-to-speech and speech-to-text, GPT-4, and Dall-E.
 
 Ex: python glibgab.py -l 1 -w 5 -i "da Vinci's painting of the Mona Lisa"
 
