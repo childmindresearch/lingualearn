@@ -4,7 +4,7 @@ Spoken and visual twist on the original Mad Lib game.
 
 Use Google text-to-speech and speech-to-text, ChatGPT, and Dall-E.
 
-Ex: python glibgab.py -l 9 -i "Leonardo Da Vinci's painting The Last Supper"
+Ex: python glibgab.py -l 1 -w 5 -i "da Vinci's painting of the Mona Lisa"
 
 Copyright 2023, Arno Klein, MIT License
 
@@ -24,12 +24,14 @@ parser = argparse.ArgumentParser(description="""
                      Spoken and visual twist on the original Mad Lib game.""",
                      formatter_class = lambda prog:
                      argparse.HelpFormatter(prog, max_help_position=40))
-parser.add_argument("-i", "--input", type=str, help='Input text for demonstration purposes.')
-parser.add_argument("-l", "--level", type=int, help="Maximum reading level by grade (default: 6).", default=6)
+parser.add_argument("-i", "--input", type=str, help="Input text for demonstration purposes.")
+parser.add_argument("-w", "--words", type=int, help="Maximum number of words to replace (default: 5).", default=5)
+parser.add_argument("-l", "--level", type=int, help="Maximum reading level by grade.")
 parser.add_argument("-q", "--quiet", action='store_true', help="Show minimal output on the command line.")
 args = parser.parse_args()
 
 input_text = args.input
+select_max_words = args.words
 max_reading_level = args.level
 quiet = args.quiet
 
@@ -45,62 +47,61 @@ if quiet:
 #-----------------------------------------------------------------------------                                              
 
 
-def generate_description(topic="famous artwork", specific_instance=False, 
+def generate_description(topic="famous artwork", example=False, 
                          max_reading_level=False, verbose=False):
     '''
     Select a topic and generate a description at the desired grade level.
     
     >>> topic = "famous artwork"
-    >>> specific_instance = "Leonardo Da Vinci's painting The Last Supper"
-    >>> max_reading_level = 9
+    >>> example = "da Vinci's painting of the Mona Lisa"
+    >>> max_reading_level = 1
     >>> verbose = True
-    >>> description = generate_description(topic, specific_instance, max_reading_level, verbose)
+    >>> description = generate_description(topic, example, max_reading_level, verbose)
 
-        Prompt:
-        Create an exciting and evocative, 1-paragraph description 
-        of the visible content (such as the appearance and behaviors of the characters, 
-        or the scenery) of the following topic:  at no more difficult than reading level 9. 
-        Do not include anything like 'The output is:' or enclosing quotation marks; 
-        return just the description. 
-        The topic is: Leonardo Da Vinci's painting The Last Supper
+    Prompt:
+    Create an evocative, 1-paragraph description of the visible content 
+    (such as the appearance and behaviors of the characters, or the scenery) 
+    of the following topic: 
+    da Vinci's painting of the Mona Lisa, at a reading level no more difficult than grade 1. 
+    Mention the topic, but do not include anything like 'The output is:' 
+    or enclosing quotation marks; return just the description.
 
-        Description:
-        "Amid an expansive dining room marked by its striking symmetry, Leonardo Da Vinci's masterpiece, 
-        The Last Supper, unfurls an intricate tapestry of human emotion and divine revelation. 
-        Thirteen figures are seated at an imposing long table, central among whom is Jesus Christ, 
-        the contrast of his attire illuminating him as the heart of the tableau. Each disciple, 
-        rendered with remarkable attention to detail, is caught in various stages of reaction to Jesus' 
-        astonishing proclamation of betrayal, their faces housing expressions of shock, disbelief, 
-        and contemplation. To either side of Christ, the disciples are segmented into groups of three, 
-        their positions and gestures forming dynamic triangles of action. The emotions surge like a palpable 
-        current, against a backdrop of meticulously drawn architectural details and serene, twilight-hued 
-        tapestries. The painting extends beyond the confines of the canvas, pulling the viewer into the 
-        dramatic narrative, as if an invisible participant in this momentous biblical event."    
+    Description:
+    The painting of the Mona Lisa, made by the artist Leonardo da Vinci, 
+    shows a pretty lady named Mona Lisa. She is sitting with a small smile 
+    on her face and her fingers crossed in her lap. She wears a dark colored 
+    dress and veil. There's a winding road and a peaceful, soft blue sky 
+    with mountains in the background. Her eyes seem to follow you wherever 
+    you move. The colors are soft and gentle. It gives a warm, quiet, and 
+    mysterious feeling.
+
     '''
 
     if max_reading_level:
-        input_level = " at no more difficult than reading level {0}".format(max_reading_level)
+        input_level = ", at a reading level no more difficult than grade {0}".format(max_reading_level)
     else:
         input_level = ""
         
 
-    if specific_instance:
+    if example:
         prompt = """
-        Create an exciting and evocative, 1-paragraph description 
-        of the visible content (such as the appearance and behaviors of the characters, 
-        or the scenery) of the following topic: {0}. 
-        Do not include anything like 'The output is:' or enclosing quotation marks; 
-        return just the description. 
-        The topic is: {1}""".format(input_level, specific_instance)
+        Create an evocative, 1-paragraph description of the visible content 
+        (such as the appearance and behaviors of the characters, or the scenery) 
+        of the following topic: 
+        {0}{1}. 
+        Mention the topic, but do not include anything like 'The output is:' 
+        or enclosing quotation marks; return just the description.
+        """.format(example, input_level)
     else:
         prompt = """
-        Randomly select an instance of the following topic: {0}. 
-        Create an exciting and evocative, 1-paragraph description 
-        of the visible content of the instance, such as the appearance and 
+        Randomly select an example of the following topic: 
+        {0}{1}.  
+        Create an evocative, 1-paragraph description 
+        of the visible content of the example, such as the appearance and 
         behaviors of the characters, or the scenery. 
-        Do not include anything like 'The output is:'; or enclosing quotation marks; 
-        return just the description. 
-        The topic is: """.format(topic)
+        Mention the topic, but do not include anything like 'The output is:'; 
+        or enclosing quotation marks; return just the description.
+        """.format(topic, input_level)
         
     if verbose:
         print("Prompt:\n{0}\n".format(prompt))
@@ -120,64 +121,101 @@ def generate_madlib(description, select_max_words=5, verbose=False):
     '''
     Generate a Mad Lib from a description.
     
-    >>> description = "People are sitting at a table eating and talking."
+    >>> description = "Sam's friends are playing with other friends."
     >>> select_max_words = 5
     >>> verbose = True
     >>> generate_madlib(description, select_max_words, verbose)
 
     Prompt:
-    Follow the steps below to process the input text: People are sitting at a table eating and talking.
-    Do not return the output from Step 1 or Step 2, only the output from Step 3.
-    Do not include anything extraneous like 'Step 3:' or 'The output is:'; 
-    return just the output itself.
-    Step 1: Select up to 5 unique words for replacement in the text. Choose unusual words.
-    Step 2: Replace the words in the text with curly brace-enclosed,
-    zero-indexed numbers representing the unique list of unique words. 
-    If there are multiple instances in the text of one of the words, replace every instance.
-    Step 3: Output the list of unique words from Step 1, 
-    and the text string with replaced words from Step 2.
-    For example, if the original text is the sentence
-    'I ate one apple, three bananas, and one cantaloupe.' 
-    and the selected words are 'one' and 'three',
-    return the list ['one', 'three'] without any enclosing punctuation,
-    and return the output sentence: I ate {0} apple, {1} bananas, and {0} cantaloupe.
+    Follow the instructions below to process the following input text: 
+    The painting of the Mona Lisa, made by the artist Leonardo da Vinci, 
+    shows a pretty lady named Mona Lisa. She is sitting with a small smile 
+    on her face and her fingers crossed in her lap. She wears a dark colored 
+    dress and veil. There's a winding road and a peaceful, soft blue sky with 
+    mountains in the background. Her eyes seem to follow you wherever you move. 
+    The colors are soft and gentle. It gives a warm, quiet, and mysterious 
+    feeling.
     
-    Unique words and Mad Lib:
-    ['People', 'sitting', 'table', 'eating', 'talking'], "{0} are {1} at a {2} {3} and {4}."
+    Instructions:
+    Select up to 5 unique words (the least common nouns or verbs) 
+    in the above input text, and don't include single quotes or apostrophes.
+    Wherever these words occur in the text, 
+    replace them with curly brace-enclosed, zero-indexed numbers 
+    representing the list of unique words. 
+    If there are multiple instances in the text of one of the words, 
+    replace every instance.
+    
+    For example, if the original text is the sentence
+    "I ate one gala apple, three fuji apples, and one cantaloupe's flesh." 
+    and the selected words are 'apple' and 'cantaloupe' 
+    (note that "cantaloupe" does not include the apostrophe),
+    return the following two things without anything else
+    (no extra text or enclosing punctuation):
+    just the list of unique words and text string with replaced words:
+    ['apple', 'cantaloupe'], 'I ate one gala {0}, three fuji {0}s, and one {1}\'s flesh.'
+    
+    Unique words:
+    ['Sam', 'friends', 'playing']
+
+    Mad Lib:
+    {0}'s {1} are {2} with other {1}.
+
+
+    Using the output from the generate_description() example above:
+
+    Unique words:
+    ['painting', 'fingers', 'veil', 'mountains', 'colors']
+
+    Mad Lib:
+    The {0} of the Mona Lisa, made by the artist Leonardo da Vinci, 
+    shows a pretty lady named Mona Lisa. She is sitting with a small smile 
+    on her face and her {1} crossed in her lap. 
+    She wears a dark colored dress and {2}. There's a winding road 
+    and a peaceful, soft blue sky with {3} in the background. 
+    Mona Lisas eyes seem to follow you wherever you move. The {4} are soft and gentle. 
+    It gives a warm, quiet, and mysterious feeling.
+
     '''
 
     prompt = """
-    Follow the steps below to process the input text: {0}
-    Do not return the output from Step 1 or Step 2, only the output from Step 3.
-    Do not include anything extraneous like 'Step 3:' or 'The output is:'; 
-    return just the output itself.
-    Step 1: Select up to {1} unique words for replacement in the text. Choose unusual words.
-    Step 2: Replace the words in the text with curly brace-enclosed,
-    zero-indexed numbers representing the unique list of unique words. 
-    If there are multiple instances in the text of one of the words, replace every instance.
-    Step 3: Output the list of unique words from Step 1, 
-    and the text string with replaced words from Step 2.
+    Follow the instructions below to process the following input text: 
+    {0}
+    
+    Instructions:
+    Select up to {1} unique words (the least common nouns or verbs) 
+    in the above input text, and don't include single quotes or apostrophes.
+    Wherever these words occur in the text, 
+    replace them with curly brace-enclosed, zero-indexed numbers 
+    representing the list of unique words. 
+    If there are multiple instances in the text of one of the words, 
+    replace every instance.
+    
     For example, if the original text is the sentence
-    'I ate one apple, three bananas, and one cantaloupe.' 
-    and the selected words are 'one' and 'three',
-    return the list ['one', 'three'] without any enclosing punctuation,
-    and return the output sentence: I ate {{0}} apple, {{1}} bananas, and {{0}} cantaloupe.
+    "I ate one gala apple, three fuji apples, and one cantaloupe's flesh." 
+    and the selected words are 'apple' and 'cantaloupe' 
+    (note that "cantaloupe" does not include the apostrophe),
+    return the following two things without anything else
+    (no extra text or enclosing punctuation):
+    just the list of unique words and text string with replaced words
+    (note that any single quotation marks or apostrophes are preceded
+    with a backslash):
+    ['apple', 'cantaloupe'], 'I ate one gala {{0}}, three fuji {{0}}s, and one {{1}}\\'s flesh.'
+    
     """.format(description, select_max_words) 
     if verbose:
         print("Prompt:\n{0}\n".format(prompt))
 
     response = generate_chatgpt_response(prompt)
-    if verbose:
-        print("Unique words and Mad Lib:\n{0}\n".format(response))
+    #if verbose:
+    #    print("Unique words and Mad Lib:\n{0}\n".format(response))
 
     # Preprocess the string to replace single quotes with double quotes
-
-    preprocessed_string = response.replace("'", '"')
-    if verbose:
-        print("Preprocessed unique words and Mad Lib:\n{0}\n".format(preprocessed_string))
+    #response = response.replace("'", '"')
+    #if verbose:
+    #    print("Preprocessed unique words and Mad Lib:\n{0}\n".format(response))
 
     # Use ast.literal_eval() to safely evaluate the preprocessed string
-    string_as_literal = ast.literal_eval(preprocessed_string)
+    string_as_literal = ast.literal_eval(response)
     
     unique_words = string_as_literal[0]
     madlib = string_as_literal[1]
@@ -200,30 +238,32 @@ def generate_madlib_question(word, verbose=False):
     >>> generate_madlib_question(word, verbose)
     
     Prompt:
-    Take the following word: six. 
-    For this word, generate a Jeopardy!-style question with multiple solutions. 
-    For example, if I give you the word 'hands', ask something like: 
+    Take the following word: six.
+
+    For this word, return a Jeopardy!-style question with many possible answers. 
+    For example, if I give you the word 'hands', return something like: 
     'Say a word for a part of the body.' 
-    If the given word is 'looking', ask something like: 
+    If the given word is 'looking', return something like: 
     'Say an action word, like "run". 
-    Do not include anything like 'The output is:'.
-    Return just the Jeopardy!-style question, without enclosing quotation marks.' 
-    The word is: six
+    Return just the Jeopardy!-style question, and do not include anything else
+    (no enclosing punctuation or extraneous text like 'The output is:').
 
     Mad Lib question:
     'Name a number that comes after five.'
+
     '''
 
     prompt = """
-    Take the following word: {0}. 
-    For this word, generate a Jeopardy!-style question with multiple solutions. 
-    For example, if I give you the word 'hands', ask something like: 
+    Take the following word: {0}.
+
+    For this word, return a Jeopardy!-style question with many possible answers. 
+    For example, if I give you the word 'hands', return something like: 
     'Say a word for a part of the body.' 
-    If the given word is 'looking', ask something like: 
-    'Say an action word, like \"run\". 
-    Do not include anything like 'The output is:'.
-    Return just the Jeopardy!-style question, without enclosing quotation marks.' 
-    The word is: {0}""".format(word)
+    If the given word is 'looking', return something like: 
+    'Say an action word, like \"run\".' 
+    Return just the Jeopardy!-style question, and do not include anything else
+    (no enclosing punctuation or extraneous text like 'The output is:').
+    """.format(word)
     if verbose:
         print("Prompt:\n{0}\n".format(prompt))
     
@@ -235,24 +275,39 @@ def generate_madlib_question(word, verbose=False):
     return madlib_question
 
 
-def fill_madlib(madlib, words, response_duration=1, verbose=False):
+def fill_madlib(madlib, words, response_duration=2, verbose=False):
     '''
     Prompt user to fill a Mad Lib using their voice.
-        
-    >>> madlib = "I ate {{0}} apple, {{1}} bananas, and {{0}} cantaloupe."
-    >>> words = ['one', 'three']
-    >>> response_duration = 3
-    >>> verbose = False
-    >>> fill_madlib(madlib, words, response_duration, verbose)
+
+    >>> madlib = "I ate one gala {0}, three fuji {0}s, and one {1}'s flesh."
+    >>> words = ['apple', 'cantaloupe']
+    >>> response_duration = 2
+    >>> verbose = True
+    >>> filled_madlib, new_words = fill_madlib(madlib, words, response_duration, verbose)
     
     Hit the Return button and begin speaking (recording will stop after 1 seconds):
-    Hit the Return button and begin speaking (recording will stop after 1 seconds):
-
+    
     New words:
-    ['25', None]
+    ['strawberry', 'honeydew']
 
     Filled Mad Lib:
-    I ate 25 apple, None bananas, and 25 cantaloupe.
+    I ate one gala strawberry, three fuji strawberrys, and one honeydew's flesh.
+
+
+    Using the output from the generate_madlib() example above:
+
+    New words:
+    ['video game', 'elephant', 'turban', 'volcano', 'x-rays']
+
+    Filled Mad Lib:
+    The video game of the Mona Lisa, made by the artist Leonardo da Vinci, 
+    shows a pretty lady named Mona Lisa. She is sitting with a small smile 
+    on her face and her elephant crossed in her lap. She wears a dark colored 
+    dress and turban. There's a winding road and a peaceful, soft blue sky 
+    with volcano in the background. Mona Lisas eyes seem to follow you wherever you 
+    move. The x-rays are soft and gentle. It gives a warm, quiet, and 
+    mysterious feeling.
+
     '''
 
     new_words = []
@@ -331,23 +386,54 @@ def fix_grammar(input_text, verbose=False):
     '''
     Fix the grammar of some provided text.
     
-    >>> input_text = "I ate 25 apple, None bananas, and 25 cantaloupe."
+    >>> input_text = "I ate one gala strawberry, three fuji strawberrys, and one honeydew's flesh."
     >>> verbose = True
     >>> fix_grammar(input_text, verbose)
     
     Prompt:
-    Use the following input text: I ate three apple, one bananas, and three cantaloupe.
-    Fix the grammar only where necessary, to correct verb conjugation, tense, singular vs. plural, etc. 
-    Return just the revised text; do not include anything like 'The output is:'
+
+    Use the following input text: 
+    I ate one gala strawberry, three fuji strawberrys, and one honeydew's flesh.    
+    
+    Fix only grammatical mistakes, such as mistakes in verb conjugation, 
+    verb tense, plural vs. singular, etc. Do not change anything to correct 
+    semantic mistakes, even if the text does not make any sense.
+    Return just the text, revised or not; do not include any enclosing 
+    punctuation or extraneous text like 'The output is:'
+
+    For example, if given "Their five orange is Apple's best deaf ice.", 
+    return: "Their five oranges are Apple's best deaf ice."
+    
+    Fixed text:
+    I ate one gala strawberry, three fuji strawberries, and the flesh of one honeydew.
+
+    
+    Using the output from the fill_madlib() example above:
 
     Fixed text:
-    I ate 25 apples, no bananas, and 25 cantaloupes.
+    The video game of the Mona Lisa, made by the artist Leonardo da Vinci, 
+    shows a pretty lady named Mona Lisa. She is sitting with a small smile 
+    on her face and her elephants crossed in her lap. She wears a dark colored 
+    dress and turban. There's a winding road and a peaceful, soft blue sky 
+    with a volcano in the background. Mona Lisa's eyes seem to follow you wherever you 
+    move. The x-rays are soft and gentle. They give a warm, quiet, and 
+    mysterious feeling.
+
     '''
 
     prompt = """
-    Use the following input text: {0}
-    Fix the grammar only where necessary, to correct verb conjugation, tense, singular vs. plural, etc. 
-    Return just the revised text; do not include anything like 'The output is:'""".format(input_text)
+    Use the following input text: 
+    {0}
+    
+    Fix only grammatical mistakes, such as mistakes in verb conjugation, 
+    verb tense, plural vs. singular, etc. Do not change anything to correct 
+    semantic mistakes, even if the text does not make any sense.
+    Return just the text, revised or not; do not include any enclosing 
+    punctuation or extraneous text like 'The output is:'
+
+    For example, if given "Their five orange is Apple's best deaf ice.", 
+    return: "Their five oranges are Apple's best deaf ice."
+    """.format(input_text)
     if verbose:
         print("Prompt:\n{0}\n".format(prompt))
 
@@ -362,21 +448,21 @@ def fix_grammar(input_text, verbose=False):
 # Demo                                                                                                  
 #-----------------------------------------------------------------------------                                              
 if do_input_text:
-    specific_instance = input_text
+    example = input_text
 else:
-    specific_instance = False
+    example = False
 
-verbose = True
+verbose = True #False
 description = generate_description(topic="famous artwork", 
-                                   specific_instance=specific_instance, 
+                                   example=example, 
                                    max_reading_level=max_reading_level, 
                                    verbose=verbose)
 madlib, unique_words = generate_madlib(description, 
-                                       select_max_words=5, 
+                                       select_max_words=select_max_words, 
                                        verbose=verbose)
 filled_madlib, new_words = fill_madlib(madlib, 
                                        words=unique_words, 
-                                       response_duration=1, 
+                                       response_duration=2, 
                                        verbose=verbose)
 fixed_madlib = fix_grammar(input_text=filled_madlib, 
                            verbose=verbose)
