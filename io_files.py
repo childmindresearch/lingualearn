@@ -5,12 +5,18 @@ File input/output functions
 Copyright 2021-2023, Arno Klein, MIT License
 
 '''
+import os
 import pickle
-
+import json
+from base64 import b64decode
+from pathlib import Path
+from PIL import Image
 
 #-----------------------------------------------------------------------------                                              
 # Functions                                                                                                
 #-----------------------------------------------------------------------------                                              
+
+
 def save_object(obj, pickle_file):
     try:
         with open(pickle_file, "wb") as f:
@@ -74,3 +80,24 @@ def display_save_output(input_list, input_name, input_text,
         if verbose:
             print('\n0 {0} for "{1}"\n'.format(input_name, input_text), end='\n')
 
+
+def json2png(json_file, output_dir="tmp"):
+
+    with open(json_file, mode="r", encoding="utf-8") as file:
+        response = json.load(file)
+
+    for index, image_dict in enumerate(response["data"]):
+        image_data = b64decode(image_dict["b64_json"])
+        image_file = os.path.join(output_dir, f"{Path(json_file).stem}-{index}.png")
+        with open(image_file, mode="wb") as png:
+            png.write(image_data)
+
+    return image_file
+
+
+def display_image(image_file):
+    '''
+    Display image.
+    '''
+    im = Image.open(image_file)
+    im.show()
