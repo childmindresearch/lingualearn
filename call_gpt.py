@@ -26,7 +26,7 @@ elif gpt_model == "gpt-3.5-turbo":  #"text-davinci-003"
 #-----------------------------------------------------------------------------                                              
 
 
-def call_gpt(prompt, model=gpt_model):
+def get_gpt_response(prompt, model=gpt_model):
     completion = openai.ChatCompletion.create(model=model, messages=[{"role": "user", "content": prompt}])
     response = completion.choices[0].message.content
 

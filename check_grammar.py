@@ -15,7 +15,7 @@ Copyright 2023, Arno Klein, MIT License
 
 '''
 import string 
-from call_gpt import generate_chatgpt_response
+from call_gpt import get_gpt_response
 
 #-----------------------------------------------------------------------------                                              
 # Set the tool(s) to check grammar. 
@@ -62,7 +62,7 @@ def check_grammar(input_sentence, grammar_tool="caribe", cap_and_punc=True, verb
     # Check grammar with ChatGPT
     if grammar_tool == "chatgpt":
         prompt = "Return just the number 1 if the following sentence is grammatically correct, or just the number 0 if it is not: '{0}'".format(input_sentence)
-        response = generate_chatgpt_response(prompt)
+        response = get_gpt_response(prompt)
         if response == '1':
             is_correct = True
             if verbose:

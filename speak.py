@@ -11,26 +11,15 @@ import sounddevice as sd
 import soundfile as sf
 import speech_recognition as sr
 
+import numpy as np 
+import pyaudio as pa 
+import struct 
+import matplotlib.pyplot as plt 
+
 
 #-----------------------------------------------------------------------------                                              
 # Functions                                                                                              
 #-----------------------------------------------------------------------------                                              
-def play_audio(output_file):
-    os.system("afplay {0}".format(output_file))  # macOS
-
-
-def text_to_speech(text, output_file="tmp/output.mp3"):
-    '''
-    >>> text = 'Test the next best text'
-    >>> text_to_speech(text)
-    '''
-    tts = gTTS(text)
-    tts.save(output_file)
-
-    # Play the audio file 
-    play_audio(output_file)
-
-
 def record_audio(duration=5, output_file="tmp/output.wav", verbose=False):
     '''
     Record audio for a given duration in seconds.
@@ -52,6 +41,30 @@ def record_audio(duration=5, output_file="tmp/output.wav", verbose=False):
 
         if verbose:
             print("\nRecording saved to: ", output_file)
+
+
+def play_audio(output_file):
+    os.system("afplay {0}".format(output_file))  # macOS
+
+
+def text_to_mp3(text, output_file="tmp/output.mp3"):
+    '''
+    >>> text = 'Test the next best text'
+    >>> text_to_mp3(text)
+    '''
+    tts = gTTS(text)
+    tts.save(output_file)
+
+
+def text_to_speech(text, output_file="tmp/output.mp3"):
+    '''
+    >>> text = 'Test the next best text'
+    >>> text_to_speech(text)
+    '''
+    text_to_mp3(text, output_file)
+
+    # Play the audio file 
+    play_audio(output_file)
 
 
 def wav_to_text(audio_source="tmp/output.wav", verbose=False):

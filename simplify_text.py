@@ -12,7 +12,7 @@ Copyright 2023, Arno Klein, MIT License
 import argparse
 import textstat
 
-from call_gpt import generate_chatgpt_response
+from call_gpt import get_gpt_response
 from io_files import display_header
 
 #-----------------------------------------------------------------------------                                              
@@ -99,7 +99,7 @@ def simplify_reading_level(input_text, max_level="6", max_loops=5, verbose=False
             #    print("The reading level is at or below grade {0}.".format(max_level))
         else:
             prompt = 'Return a simplified version of the following text that is at or below a reading level of school grade {0}: {1}'.format(max_level, response)
-            response = generate_chatgpt_response(prompt)
+            response = get_gpt_response(prompt)
             if verbose:
                 print('"{0}"'.format(response))
             level = check_reading_level(response, verbose)

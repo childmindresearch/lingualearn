@@ -39,7 +39,7 @@ import random
 
 from process_phonemes import phoneme_list, consonant_list, words_to_sounds, separate_consonants, generate_homophones
 from speak import text_to_speech
-from call_gpt import generate_chatgpt_response
+from call_gpt import get_gpt_response
 from speak import speech_to_text
 from io_files import display_header
 
@@ -381,25 +381,25 @@ def type_word_to_match_context(word, context='definition', ntries=None, verbose=
     if context == 'definition':
         # Get a ChatGPT-generated definition for the word
         prompt = "Return a brief definition for the following word without using the word (or number, if relevant) in the definition: '{0}'".format(word)
-        response = generate_chatgpt_response(prompt)
+        response = get_gpt_response(prompt)
         print("\nChatGPT-generated definition:\n{0}".format(response))
         entered_word = input('\nType a word that matches this definition: ')
     elif context == 'synonym':
         # Get ChatGPT-generated synonyms for the word
         prompt = "List synonyms for the following word without using the word (or number, if relevant) at all: '{0}'".format(word)
-        response = generate_chatgpt_response(prompt)
+        response = get_gpt_response(prompt)
         print("\nChatGPT-generated synonyms:\n{0}".format(response))
         entered_word = input('\nType a word that is similar in meaning as these words: ')
     elif context == 'antonym':
         # Get ChatGPT-generated antonyms for the word
         prompt = "List antonyms for the following word without using the word (or number, if relevant) at all: '{0}'".format(word)
-        response = generate_chatgpt_response(prompt)
+        response = get_gpt_response(prompt)
         print("\nChatGPT-generated antonyms:\n{0}".format(response))
         entered_word = input('\nType a word that means the opposite of these words: ')
     elif context == 'jeopardy':
         # Get ChatGPT-generated Jeopardy!-style description referring to the word
         prompt = "Return a very brief Jeopardy!-style description related to the following word without using the word (or number, if relevant) at all: '{0}'".format(word)
-        response = generate_chatgpt_response(prompt)
+        response = get_gpt_response(prompt)
         print("\nChatGPT-generated Jeopardy-style description:\n{0}".format(response))
         entered_word = input('\nType a word that matches this description: ')
 
@@ -458,7 +458,7 @@ def type_word_in_a_sentence(word, ntries=None, verbose=False):
            
             # Check word usage using ChatGPT
             prompt = 'Return just the number 1 if SENTENCE uses the word "{0}" appropriately, or just the number 0 if it does not. If SENTENCE uses the word in a trivial manner, like "{0} is a word with {1} letters." return just the number 2. SENTENCE is: "{2}"'.format(word, len(word), entered_text)
-            response = generate_chatgpt_response(prompt)
+            response = get_gpt_response(prompt)
             if response == '1':
                 correct = True
                 score += 1
@@ -512,7 +512,7 @@ def say_word_in_a_sentence(word, duration=3, output_audio="tmp/output.wav",
            
             # Check word usage using ChatGPT
             prompt = 'Return just the number 1 if SENTENCE uses the word "{0}" appropriately, or just the number 0 if it does not. If SENTENCE uses the word in a trivial manner, like "{0} is a word with {1} letters." return just the number 2. SENTENCE is: "{2}"'.format(word, len(word), output_text)
-            response = generate_chatgpt_response(prompt)
+            response = get_gpt_response(prompt)
             if response == '1':
                 correct = True
                 score += 1
