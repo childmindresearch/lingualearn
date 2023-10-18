@@ -64,22 +64,18 @@ else:
     example = False
 
 verbose = True
-print("1")
 if not use_preset:
     description, example = generate_description(topic="famous artwork", 
                                                 example=example, 
                                                 max_reading_level=max_reading_level, 
                                                 verbose=verbose)
-print("2")
 madlib, unique_words = generate_madlib(description, 
                                        select_max_words=select_max_words, 
                                        verbose=verbose)
-print("3")
 filled_madlib, new_words = fill_madlib(madlib, 
                                        words=unique_words, 
                                        response_duration=2, 
                                        verbose=verbose)
-print("4")
 fixed_madlib = fix_grammar(input_text=filled_madlib, 
                            verbose=verbose)
 

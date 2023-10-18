@@ -47,7 +47,7 @@ def live_spectrogram():
                 ax.pcolormesh(t, f, 10 * np.log10(Sxx), shading='gouraud')
                 ax.set_ylabel('Frequency [Hz]')
                 ax.set_xlabel('Time [sec]')
-                ax.set_ylim(0, 10000)  # Adjust ylim as needed
+                ax.set_ylim(0, 3000)  # Adjust ylim as needed
                 clear_output(wait=True)
                 display(fig)
                 plt.pause(0.01)
