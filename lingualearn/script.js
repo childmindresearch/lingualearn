@@ -4,7 +4,10 @@ let analyser;
 let microphone;
 let isListening = false;
 let currentWordIndex = 0;
-let meydaAnalyzer;
+let maxPitch = 50;
+let maxVolume = 350;
+let plotWidth = 800; // copied from style.css
+let plotHeight = 350; // copied from style.css
 
 // Words
 const words = [
@@ -37,6 +40,7 @@ function processAudio() {
         if (!isListening) return; // Stop processing if not listening
         requestAnimationFrame(process);
         analyser.getByteFrequencyData(dataArray);
+
         const features = extractFeatures(dataArray);
         updateMarkerPosition(features);
         checkProximity();
@@ -44,23 +48,57 @@ function processAudio() {
     process();
 }
 
+// Placeholder function for feature extraction
+function extractFeatures(dataArray) {
+    const pitch = detectPitch(dataArray); // Implement a better pitch detection algorithm
+    const volume = calculateRMS(dataArray); // Calculate RMS for volume
+    const features = { x: pitch, y: volume };
+    console.log(features.x, features.y);
+    return features
+}
 
-/*
-    // Initialize Meyda Analyzer
-    meydaAnalyzer = Meyda.createMeydaAnalyzer({
-        audioContext: audioContext,
-        source: microphone,
-        bufferSize: 512, // Adjust as needed
-        featureExtractors: ['mfcc'],
-        callback: features => {
-            updateMarkerPosition(features);
-        }
-    });
+function calculateRMS(data) {
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+        sum += (data[i] - 128) ** 2; // Data is unsigned byte; 128 is the zero level
+    }
+    return Math.sqrt(sum / data.length);
+}
 
-    isListening = true;
+function detectPitch(dataArray) {
+    // Implement a basic pitch detection algorithm
+    // This is a placeholder and needs a proper implementation
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+    }
+    return sum / dataArray.length; // Placeholder calculation
+}
 
-    meydaAnalyzer.start();
-*/
+function detectVolume(data) {
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+        sum += data[i];
+    }
+    return sum / data.length;
+}
+
+function detectFrequencySpectrum(data) {
+    // Perform a Fourier Transform to convert time-domain data to frequency-domain
+    // This is a placeholder - a real implementation is more complex
+    return data; // Placeholder array of frequency intensities
+}
+function detectRhythm(data) {
+    // Analyze the waveform to find rhythmic patterns
+    // This is a simplified placeholder
+    return "rhythm pattern"; // Placeholder string representing the rhythm
+}
+
+function analyzeWaveform(data) {
+    // Analyze the shape of the waveform
+    // Placeholder for waveform analysis
+    return "waveform characteristics"; // Placeholder string representing waveform shape
+}
 
 // Function to create a circle
 function createCircle(id, className, position) {
@@ -86,29 +124,19 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
 
 // Function to update the marker position
 function updateMarkerPosition(features) {
-    //if (!features.mfcc) return;
+    // Normalize x and y values to fit within the plot area
+    let normalizedX = normalizeValue(features.x, 0, maxPitch, 0, plotWidth);
+    let normalizedY = normalizeValue(features.y, 0, maxVolume, 0, plotHeight);
 
     // Update marker position (you might need to scale or adjust these values)
     let marker = document.getElementById('red-marker');
-
-    // Example: Use the first two MFCCs for x and y positions
-    //let x = features.mfcc[0];
-    //let y = features.mfcc[1];
-    //marker.style.left = x + 'px';
-    //marker.style.top = y + 'px';
-    marker.style.left = features.x + 'px';
-    marker.style.top = features.y + 'px';
+    marker.style.left = normalizedX + 'px';
+    marker.style.top = normalizedY + 'px';
 }
 
-// Placeholder function for feature extraction
-function extractFeatures(dataArray) {
-    // Implement feature extraction logic
-    // For demonstration, let's use a simple frequency-based placeholder
-    const maxIndex = dataArray.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
-    return {
-        x: maxIndex, // placeholder for horizontal axis
-        y: dataArray[maxIndex] // placeholder for vertical axis
-    };
+function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
+    // Normalize a value from one range to another
+    return ((value - minInput) / (maxInput - minInput)) * (maxOutput - minOutput) + minOutput;
 }
 
 // Define a function to calculate the distance between two points
@@ -135,10 +163,11 @@ function celebrateSuccess() {
     isListening = false; // Stop audio processing
     displayCelebratoryMessage();
     setTimeout(() => {
-        displayNextWord();
-        //displayRandomWord();
+        let position = displayRandomWord();  //displayNextWord();
+        initializePlot(position.x, position.y, 0, 0);
         isListening = true; // Restart audio processing
         processAudio();
+
     }, 2000); // Adjust the delay as needed
 }
 
@@ -165,7 +194,6 @@ function displayRandomWord() {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     let position = displayRandomWord();  //displayNextWord();
-    //let position = displayNextWord();  //displayNextWord();
     initializePlot(position.x, position.y, 0, 0);
     document.getElementById('start-button').addEventListener('click', () => {
         if (!isListening) {
