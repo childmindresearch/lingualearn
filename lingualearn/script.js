@@ -4,6 +4,8 @@ let analyser;
 let microphone;
 let isListening = false;
 let currentWordIndex = 0;
+let meydaAnalyzer;
+
 // Words
 const words = [
     { word: "beet", position: { x: 50, y: 50 } }, 
@@ -42,6 +44,24 @@ function processAudio() {
     process();
 }
 
+
+/*
+    // Initialize Meyda Analyzer
+    meydaAnalyzer = Meyda.createMeydaAnalyzer({
+        audioContext: audioContext,
+        source: microphone,
+        bufferSize: 512, // Adjust as needed
+        featureExtractors: ['mfcc'],
+        callback: features => {
+            updateMarkerPosition(features);
+        }
+    });
+
+    isListening = true;
+
+    meydaAnalyzer.start();
+*/
+
 // Function to create a circle
 function createCircle(id, className, position) {
     let circle = document.createElement('div');
@@ -66,7 +86,16 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
 
 // Function to update the marker position
 function updateMarkerPosition(features) {
+    //if (!features.mfcc) return;
+
+    // Update marker position (you might need to scale or adjust these values)
     let marker = document.getElementById('red-marker');
+
+    // Example: Use the first two MFCCs for x and y positions
+    //let x = features.mfcc[0];
+    //let y = features.mfcc[1];
+    //marker.style.left = x + 'px';
+    //marker.style.top = y + 'px';
     marker.style.left = features.x + 'px';
     marker.style.top = features.y + 'px';
 }
