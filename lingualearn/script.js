@@ -4,8 +4,18 @@ let analyser;
 let microphone;
 let isListening = false;
 let currentWordIndex = 0;
-let words = ["bot", "bat", "but", "bought", "bet", "bit", "beet", "book", "boot"];
-let phonemes = ["bot", "bat", "but", "bought", "bet", "bit", "beet", "book", "boot"];
+// Words
+const words = [
+    { word: "beet", position: { x: 50, y: 50 } }, 
+    { word: "boot", position: { x: 750, y: 50 } },
+    { word: "bit", position: { x: 200, y: 100 } }, 
+    { word: "book", position: { x: 550, y: 100 } },
+    { word: "but", position: { x: 450, y: 150 } },
+    { word: "bet", position: { x: 250, y: 200 } },
+    { word: "bought", position: { x: 750, y: 200 } }, 
+    { word: "bat", position: { x: 300, y: 250 } },
+    { word: "bot", position: { x: 350, y: 300 } } 
+];
 
 // Function to initialize audio processing
 async function initAudio() {
@@ -96,7 +106,8 @@ function celebrateSuccess() {
     isListening = false; // Stop audio processing
     displayCelebratoryMessage();
     setTimeout(() => {
-        displayRandomWord();
+        displayNextWord();
+        //displayRandomWord();
         isListening = true; // Restart audio processing
         processAudio();
     }, 2000); // Adjust the delay as needed
@@ -111,29 +122,22 @@ function displayCelebratoryMessage() {
 // Function to display the next word
 function displayNextWord() {
     currentWordIndex = (currentWordIndex + 1) % words.length;
-    document.getElementById('word-display').textContent = words[currentWordIndex];
-    updateTargetPosition(); // Update the position of the gray circle for the new word
+    document.getElementById('word-display').textContent = words[currentWordIndex].word;
+    return words[currentWordIndex].position; // Return the position of the new word
 }
 
 // Function to display a random word
 function displayRandomWord() {
-    document.getElementById('word-display').textContent = words[Math.floor(Math.random() * words.length)];
-    updateTargetPosition(); // Update the position of the gray circle for the new word
-}
-
-// Function to update the target position based on the current word
-function updateTargetPosition() {
-    // Logic to update the position of the gray circle based on the current word
-    // This is a placeholder; replace it with your actual positioning logic
-    //let targetCircle = document.getElementById('target-circle');
-    //targetCircle.style.left = '100px'; // Example position
-    //targetCircle.style.top = '50px';
+    let randomWordIndex = Math.floor(Math.random() * words.length);
+    document.getElementById('word-display').textContent = words[randomWordIndex].word;
+    return words[randomWordIndex].position; // Return the position of the new word
 }
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    displayRandomWord();  //displayNextWord();
-    initializePlot(20, 250, 0, 0);
+    let position = displayRandomWord();  //displayNextWord();
+    //let position = displayNextWord();  //displayNextWord();
+    initializePlot(position.x, position.y, 0, 0);
     document.getElementById('start-button').addEventListener('click', () => {
         if (!isListening) {
             initAudio();
