@@ -102,7 +102,7 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
     }
 
     drawGrid();
-    //addAxisLabels();
+    addAxisLabels();
 
     let targetCircle = createCircle('target-circle', 'circle', { x: target_x, y: target_y });
     let redMarker = createCircle('red-marker', 'circle marker', { x: marker_x, y: marker_y });
@@ -155,8 +155,7 @@ function celebrateSuccess() {
     displayCelebratoryMessage();
     setTimeout(() => {
         let position = displayRandomWord();  //displayNextWord();
-        //initializePlot(position.x - markerWidth, position.y - markerWidth, initX, initY);
-        initializePlot(position.x, position.y, 0, 0);
+        initializePlot(position.x - markerRadius, position.y - markerRadius, initX, initY);
         isListening = true; // Restart audio processing
         processAudio();
     }, 1000); // Adjust the delay as needed
@@ -164,9 +163,28 @@ function celebrateSuccess() {
 
 // Function to display a celebratory message
 function displayCelebratoryMessage() {
-    // Display your celebratory message
-    alert('Great pronunciation!');
+    // Play a sound
+    var audio = new Audio('assets/yay.mp3'); // Replace with the path to your sound file
+    audio.play();
+
+    // Add confetti animation
+    let animationContainer = document.createElement('div');
+    animationContainer.id = 'animation-container';
+    document.body.appendChild(animationContainer);
+
+    // Add individual confetti elements
+    for (let i = 0; i < 100; i++) {
+        let confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        animationContainer.appendChild(confetti);
+    }
+
+    // Remove the animation after it's done
+    setTimeout(() => {
+        document.body.removeChild(animationContainer);
+    }, 2000); // Adjust time as needed
 }
+
 
 // Function to display the next word
 function displayNextWord() {
@@ -211,22 +229,22 @@ function addAxisLabels() {
 
     let yAxisLabelUpperLeft = document.createElement('div');
     yAxisLabelUpperLeft.className = 'axis-label';
-    yAxisLabelUpperLeft.textContent = 'front & closed';
+    yAxisLabelUpperLeft.textContent = 'front/closed';
     yAxisLabelUpperLeft.style.top = '0';
     plotArea.appendChild(yAxisLabelUpperLeft);
     let yAxisLabelLowerLeft = document.createElement('div');
     yAxisLabelLowerLeft.className = 'axis-label';
-    yAxisLabelLowerLeft.textContent = 'front & open';
+    yAxisLabelLowerLeft.textContent = 'front/open';
     yAxisLabelLowerLeft.style.bottom = '0';
     plotArea.appendChild(yAxisLabelLowerLeft);
     let xAxisLabelUpperRight = document.createElement('div');
     xAxisLabelUpperRight.className = 'axis-label';
-    xAxisLabelUpperRight.textContent = 'back & closed';
+    xAxisLabelUpperRight.textContent = 'back/closed';
     xAxisLabelUpperRight.style.right = '0';
     plotArea.appendChild(xAxisLabelUpperRight);
     let xAxisLabelLowerRight = document.createElement('div');
     xAxisLabelLowerRight.className = 'axis-label';
-    xAxisLabelLowerRight.textContent = 'back & open';
+    xAxisLabelLowerRight.textContent = 'back/open';
     xAxisLabelLowerRight.style.right = '0';
     xAxisLabelLowerRight.style.bottom = '0';
     plotArea.appendChild(xAxisLabelLowerRight);
@@ -235,8 +253,7 @@ function addAxisLabels() {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     let position = displayRandomWord();  //displayNextWord();
-    //initializePlot(position.x - markerRadius, position.y - markerRadius, initX, initY);
-    initializePlot(position.x, position.y, 0, 0);
+    initializePlot(position.x - markerRadius, position.y - markerRadius, initX, initY);
     document.getElementById('start-button').addEventListener('click', () => {
         if (!isListening) {
             initAudio();
