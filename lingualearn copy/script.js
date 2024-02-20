@@ -102,7 +102,7 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
     }
 
     drawGrid();
-    //addAxisLabels();
+    addAxisLabels();
 
     let targetCircle = createCircle('target-circle', 'circle', { x: target_x, y: target_y });
     let redMarker = createCircle('red-marker', 'circle marker', { x: marker_x, y: marker_y });
@@ -121,8 +121,8 @@ function updateMarkerPosition(features) {
 
     // Update marker position (you might need to scale or adjust these values)
     let marker = document.getElementById('red-marker');
-    marker.style.left = normalizedX + 'px';
-    marker.style.top = normalizedY + 'px';
+    marker.style.left = (normalizedX) + 'px';
+    marker.style.top = (normalizedY) + 'px';
 }
 
 function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
@@ -155,8 +155,7 @@ function celebrateSuccess() {
     displayCelebratoryMessage();
     setTimeout(() => {
         let position = displayRandomWord();  //displayNextWord();
-        //initializePlot(position.x - markerWidth, position.y - markerWidth, initX, initY);
-        initializePlot(position.x, position.y, 0, 0);
+        initializePlot(position.x - markerWidth, position.y - markerWidth, initX, initY);
         isListening = true; // Restart audio processing
         processAudio();
     }, 1000); // Adjust the delay as needed
@@ -235,8 +234,7 @@ function addAxisLabels() {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     let position = displayRandomWord();  //displayNextWord();
-    //initializePlot(position.x - markerRadius, position.y - markerRadius, initX, initY);
-    initializePlot(position.x, position.y, 0, 0);
+    initializePlot(position.x - markerRadius, position.y - markerRadius, initX, initY);
     document.getElementById('start-button').addEventListener('click', () => {
         if (!isListening) {
             initAudio();
