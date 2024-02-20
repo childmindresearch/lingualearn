@@ -19,6 +19,21 @@ body {
     margin-bottom: 20px;
 }
 
+.grid-line {
+    position: absolute;
+    background-color: #c8c8c8; /* Grid line color */
+}
+
+.vertical {
+    width: 1px; /* Vertical line thickness */
+    height: 100%; /* Full height of the plot area */
+}
+
+.horizontal {
+    height: 1px; /* Horizontal line thickness */
+    width: 100%; /* Full width of the plot area */
+}
+
 #word-display {
     font-size: 24px;
     margin-bottom: 20px;

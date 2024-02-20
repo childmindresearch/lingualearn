@@ -87,6 +87,8 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
         plotArea.removeChild(plotArea.firstChild);
     }
 
+    drawGrid();
+
     let targetCircle = createCircle('target-circle', 'circle', { x: target_x, y: target_y });
     let redMarker = createCircle('red-marker', 'circle marker', { x: marker_x, y: marker_y });
 
@@ -164,6 +166,30 @@ function displayRandomWord() {
     return words[randomWordIndex].position; // Return the position of the new word
 }
 
+function drawGrid() {
+    let plotArea = document.getElementById('plot-area');
+    let numberOfVerticalLines = 17;
+    let numberOfHorizontalLines = 7;
+    let xSpacing = plotWidth / numberOfVerticalLines;
+    let ySpacing = plotHeight / numberOfHorizontalLines;
+
+    // Draw vertical lines
+    for (let i = 0; i <= numberOfVerticalLines; i++) {
+        let line = document.createElement('div');
+        line.className = 'grid-line vertical';
+        line.style.left = i * xSpacing + 'px';
+        plotArea.appendChild(line);
+    }
+
+    // Draw horizontal lines
+    for (let i = 0; i <= numberOfHorizontalLines; i++) {
+        let line = document.createElement('div');
+        line.className = 'grid-line horizontal';
+        line.style.top = i * ySpacing + 'px';
+        plotArea.appendChild(line);
+    }
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     let position = displayRandomWord();  //displayNextWord();
@@ -174,4 +200,5 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('start-button').style.display = 'none';
         }
     });
+    //drawGrid();
 });
