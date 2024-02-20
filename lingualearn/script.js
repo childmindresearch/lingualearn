@@ -4,8 +4,10 @@ let analyser;
 let microphone;
 let isListening = false;
 let currentWordIndex = 0;
-let maxPitch = 50;
-let maxVolume = 350;
+let minX = 0;
+let maxX = -60;
+let minY = 0;
+let maxY = -60;
 let plotWidth = 800; // copied from style.css
 let plotHeight = 350; // copied from style.css
 
@@ -25,6 +27,7 @@ const words = [
 // Function to initialize audio processing
 async function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    sampleRate = audioContext.sampleRate;
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     microphone = audioContext.createMediaStreamSource(stream);
     analyser = audioContext.createAnalyser();
@@ -35,11 +38,16 @@ async function initAudio() {
 
 // Function to process audio data
 function processAudio() {
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Float32Array(bufferLength);
+    //console.log(dataArray)
+
+    //const dataArray = new Uint8Array(analyser.frequencyBinCount);
     const process = () => {
         if (!isListening) return; // Stop processing if not listening
         requestAnimationFrame(process);
-        analyser.getByteFrequencyData(dataArray);
+        analyser.getFloatFrequencyData(dataArray);
+        //analyser.getByteFrequencyData(dataArray);
 
         const features = extractFeatures(dataArray);
         updateMarkerPosition(features);
@@ -48,56 +56,14 @@ function processAudio() {
     process();
 }
 
-// Placeholder function for feature extraction
+// Feature extraction
 function extractFeatures(dataArray) {
-    const pitch = detectPitch(dataArray); // Implement a better pitch detection algorithm
-    const volume = calculateRMS(dataArray); // Calculate RMS for volume
-    const features = { x: pitch, y: volume };
-    console.log(features.x, features.y);
+    const formants = extractFormants(dataArray, sampleRate); // formants
+    //console.log("F1: ", formants.F1.value)
+    //console.log("F2: ", formants.F2.value)    
+    const features = { x: formants.F1.value, y: formants.F2.value };
+    //console.log(features.x, features.y);
     return features
-}
-
-function calculateRMS(data) {
-    let sum = 0;
-    for (let i = 0; i < data.length; i++) {
-        sum += (data[i] - 128) ** 2; // Data is unsigned byte; 128 is the zero level
-    }
-    return Math.sqrt(sum / data.length);
-}
-
-function detectPitch(dataArray) {
-    // Implement a basic pitch detection algorithm
-    // This is a placeholder and needs a proper implementation
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
-    }
-    return sum / dataArray.length; // Placeholder calculation
-}
-
-function detectVolume(data) {
-    let sum = 0;
-    for (let i = 0; i < data.length; i++) {
-        sum += data[i];
-    }
-    return sum / data.length;
-}
-
-function detectFrequencySpectrum(data) {
-    // Perform a Fourier Transform to convert time-domain data to frequency-domain
-    // This is a placeholder - a real implementation is more complex
-    return data; // Placeholder array of frequency intensities
-}
-function detectRhythm(data) {
-    // Analyze the waveform to find rhythmic patterns
-    // This is a simplified placeholder
-    return "rhythm pattern"; // Placeholder string representing the rhythm
-}
-
-function analyzeWaveform(data) {
-    // Analyze the shape of the waveform
-    // Placeholder for waveform analysis
-    return "waveform characteristics"; // Placeholder string representing waveform shape
 }
 
 // Function to create a circle
@@ -115,6 +81,12 @@ function createCircle(id, className, position) {
 // Function to initialize the plot with target and marker
 function initializePlot(target_x, target_y, marker_x, marker_y) {
     let plotArea = document.getElementById('plot-area');
+
+    // Clear existing elements in the plot area
+    while (plotArea.firstChild) {
+        plotArea.removeChild(plotArea.firstChild);
+    }
+
     let targetCircle = createCircle('target-circle', 'circle', { x: target_x, y: target_y });
     let redMarker = createCircle('red-marker', 'circle marker', { x: marker_x, y: marker_y });
 
@@ -125,8 +97,10 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
 // Function to update the marker position
 function updateMarkerPosition(features) {
     // Normalize x and y values to fit within the plot area
-    let normalizedX = normalizeValue(features.x, 0, maxPitch, 0, plotWidth);
-    let normalizedY = normalizeValue(features.y, 0, maxVolume, 0, plotHeight);
+    let normalizedX = normalizeValue(features.x, minX, maxX, 0, plotWidth);
+    let normalizedY = normalizeValue(features.y, minY, maxY, 0, plotHeight);
+    //console.log("normalizedX: ", normalizedX)
+    //console.log("normalizedY: ", normalizedY)
 
     // Update marker position (you might need to scale or adjust these values)
     let marker = document.getElementById('red-marker');
@@ -167,7 +141,6 @@ function celebrateSuccess() {
         initializePlot(position.x, position.y, 0, 0);
         isListening = true; // Restart audio processing
         processAudio();
-
     }, 2000); // Adjust the delay as needed
 }
 
