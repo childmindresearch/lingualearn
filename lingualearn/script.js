@@ -167,24 +167,26 @@ function displayCelebratoryMessage() {
     var audio = new Audio('assets/yay.mp3'); // Replace with the path to your sound file
     audio.play();
 
-    // Add confetti animation
-    let animationContainer = document.createElement('div');
-    animationContainer.id = 'animation-container';
-    document.body.appendChild(animationContainer);
-
-    // Add individual confetti elements
-    for (let i = 0; i < 100; i++) {
-        let confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        animationContainer.appendChild(confetti);
-    }
-
-    // Remove the animation after it's done
-    setTimeout(() => {
-        document.body.removeChild(animationContainer);
-    }, 2000); // Adjust time as needed
-}
-
+     // Create confetti container
+     let confettiContainer = document.createElement('div');
+     confettiContainer.id = 'confetti-container';
+     document.body.appendChild(confettiContainer);
+ 
+     // Generate confetti pieces
+     for (let i = 0; i < 50; i++) {
+         let confetti = document.createElement('div');
+         confetti.className = 'confetti';
+         confetti.style.left = `${Math.random() * 100}%`; // Randomize the initial horizontal position
+         confetti.style.animationDelay = `${Math.random() * 2}s`; // Randomize the animation start time
+         confetti.style.animationDuration = `${Math.random() * 3 + 2}s`; // Randomize the animation duration          confettiContainer.appendChild(confetti);
+         confettiContainer.appendChild(confetti);
+        }
+ 
+     // Remove the confetti after 3 seconds
+     setTimeout(() => {
+         confettiContainer.remove();
+     }, 3000);
+ }
 
 // Function to display the next word
 function displayNextWord() {
