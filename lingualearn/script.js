@@ -1,3 +1,5 @@
+// script.js
+
 // Define global variables
 let audioContext;
 let analyser;
@@ -100,7 +102,6 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
     while (plotArea.firstChild) {
         plotArea.removeChild(plotArea.firstChild);
     }
-
     drawGrid();
     addAxisLabels();
 
@@ -119,10 +120,15 @@ function updateMarkerPosition(features) {
     //console.log("normalizedX: ", normalizedX)
     //console.log("normalizedY: ", normalizedY)
 
-    // Update marker position (you might need to scale or adjust these values)
+    // Update marker position
     let marker = document.getElementById('red-marker');
     marker.style.left = normalizedX + 'px';
     marker.style.top = normalizedY + 'px';
+
+     // Update stretching image size based on marker position
+     let wordStretchImage = document.getElementById('word-image-stretch');
+     wordStretchImage.style.width = (plotWidth * 0.5 + features.x) + 'px'; // Stretch horizontally
+     wordStretchImage.style.height = (plotHeight * 0.5 + features.y) + 'px'; // Stretch vertically  
 }
 
 function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
@@ -142,7 +148,7 @@ function checkProximity() {
     let markerPos = { x: parseInt(marker.style.left, 10), y: parseInt(marker.style.top, 10) };
     let targetPos = { x: parseInt(target.style.left, 10), y: parseInt(target.style.top, 10) };
     let distance = calculateDistance(markerPos, targetPos);
-    let proximityRadius = 20; // Adjust this radius as needed
+    let proximityRadius = 20; // Radius
 
     if (distance <= proximityRadius) {
         celebrateSuccess();
@@ -154,11 +160,11 @@ function celebrateSuccess() {
     isListening = false; // Stop audio processing
     displayCelebratoryMessage();
     setTimeout(() => {
-        let position = displayRandomWord();  //displayNextWord();
+        let position = displayNextWord();
         initializePlot(position.x - markerRadius, position.y - markerRadius, initX, initY);
         isListening = true; // Restart audio processing
         processAudio();
-    }, 1000); // Adjust the delay as needed
+    }, 1000); // Delay in ms
 }
 
 // Function to display a celebratory message
@@ -191,17 +197,28 @@ function displayCelebratoryMessage() {
 // Function to display the next word
 function displayNextWord() {
     currentWordIndex = (currentWordIndex + 1) % words.length;
-    document.getElementById('word-display').textContent = words[currentWordIndex].word;
+    //let currentWordIndex = Math.floor(Math.random() * words.length);
+    let word = words[currentWordIndex].word;
+    document.getElementById('word-display').textContent = word;
+    
+    // Update the image source
+    let wordFixedImage = document.getElementById('word-image-fixed');
+    let wordStretchImage = document.getElementById('word-image-stretch');
+    wordFixedImage.src = wordStretchImage.src = 'assets/pictures/' + word + '.png'; // Set image source
+    wordFixedImage.style.display = wordStretchImage.style.display = 'block';
+
+    // Set initial size of the fixed image
+    wordFixedImage.style.maxWidth = '50%'; // 50% of the container width
+    wordFixedImage.style.maxHeight = '50%'; // 50% of the container height
+
+    // Initial size of the stretching image
+    wordStretchImage.style.width = '50%'; // 50% of the container width
+    wordStretchImage.style.height = '50%'; // 50% of the container height
+    
     return words[currentWordIndex].position; // Return the position of the new word
 }
 
-// Function to display a random word
-function displayRandomWord() {
-    let randomWordIndex = Math.floor(Math.random() * words.length);
-    document.getElementById('word-display').textContent = words[randomWordIndex].word;
-    return words[randomWordIndex].position; // Return the position of the new word
-}
-
+// Function to draw a grid
 function drawGrid() {
     let plotArea = document.getElementById('plot-area');
     let numberOfVerticalLines = 16;
@@ -254,12 +271,12 @@ function addAxisLabels() {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    let position = displayRandomWord();  //displayNextWord();
+    let position = displayNextWord();
     initializePlot(position.x - markerRadius, position.y - markerRadius, initX, initY);
-    document.getElementById('start-button').addEventListener('click', () => {
+    document.getElementById('start-button-img').addEventListener('click', () => {
         if (!isListening) {
             initAudio();
-            document.getElementById('start-button').style.display = 'none';
+            document.getElementById('start-button-img').style.display = 'none';
         }
     });
 });

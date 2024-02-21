@@ -1,14 +1,45 @@
 /* style.css */
+
+#header {
+    display: flex;
+    align-items: center;
+}
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
     background-color: #f0f0f0;
 }
 
+#logo {
+    top: 15px; 
+    left: 10px;  
+    height: 60px;
+}
+
+#header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto;
+    width: 800px;
+    padding: 20px;
+}
+
 #app {
     margin: 0 auto;
     width: 800px;
-    padding: 0px;
+    padding: 40px;
+}
+
+h1 {
+    margin: 0 20px; /* Add margin around the h1 for spacing */
+}
+
+#start-button-img {
+    cursor: pointer; /* Makes the image behave like a clickable button */
+    margin-left: 20px;
+    height: 40px;
 }
 
 #plot-area {
@@ -64,6 +95,23 @@ body {
     background-color: red;
 }
 
+#image-container {
+    text-align: center; 
+    margin-top: 20px; 
+}
+
+#word-image-fixed, #word-image-stretch {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 10px;
+}
+
+#word-image-fixed {
+    max-width: 50%;
+    max-height: 50%;
+}
+
 #confetti-container {
     position: fixed;
     top: 0;
@@ -94,9 +142,3 @@ body {
     100% { transform: translateY(100vh) rotate(45deg); }
 }
 
-#logo {
-    position: absolute;
-    top: 10px; 
-    left: 10px;  
-    height: 60px;
-}

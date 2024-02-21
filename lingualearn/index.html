@@ -8,18 +8,20 @@
     <link rel="stylesheet" href="style.css"> <!-- Link to CSS file -->
 </head>
 <body>
-    <div id="app">
-        <div id="app">
-            <img src="assets/CMI_logo.png" alt="Logo" id="logo">
-        </div>
+    <div id="header">
+        <img src="assets/CMI_logo.png" alt="Logo" id="logo">
         <h1>LinguaLearn</h1>
+        <img src="assets/start.png" alt="Start Listening" id="start-button-img">
+    </div>
+    <div id="app">    
         <div id="plot-area">
-            <!-- Dynamic plot will be rendered here -->
         </div>
         <div id="word-display">
-            <!-- Random word from Table 1 will be displayed here -->
         </div>
-        <button id="start-button">Start listening</button>
+        <div id="image-container">
+            <img id="word-image-fixed" src="" alt="Word Image Fixed" style="display: none;">
+            <img id="word-image-stretch" src="" alt="Word Image Stretch" style="display: none;">
+        </div>
     </div>
     <script src="features.js"></script>
     <script src="script.js"></script>
