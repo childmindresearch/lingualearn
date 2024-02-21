@@ -8,21 +8,25 @@
 }
 
 #logo {
-    top: 15px; 
-    height: 60px;
+    top: 0px; 
+    height: 36px;
 }
 
 h1 {
-    justify-self: center;
-    margin: 0;
+    font-size: 20px;
+    color: #0067a0;
+    justify-self: right;
+    margin-right: 2px;
 }
 
 #start-button-img {
     cursor: pointer; /* image behaves like a clickable button */
-    height: 40px;
+    height: 30px;
     visibility: visible; /* Default state */
     opacity: 1; /* Default state */
     transition: opacity 0.5s; /* Smooth transition for hiding */
+    justify-self: left;
+    margin-left: 10px;
 }
 
 body {
@@ -34,12 +38,12 @@ body {
 #app {
     margin: 0 auto;
     width: 800px;
-    padding: 40px;
+    padding: 0px;
 }
 
 #plot-area {
     width: 800px;
-    height: 350px;
+    height: 100px;
     border: 1px solid #000;
     position: relative;
     margin-bottom: 0px;
@@ -67,8 +71,12 @@ body {
 }
 
 #word-display {
-    font-size: 100px;
+    font-size: 80px;
     margin-bottom: 0px;
+}
+
+.highlighted {
+    color: #ea234b;
 }
 
 #start-button {
@@ -76,18 +84,18 @@ body {
 }
 
 .circle {
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
     position: absolute;
 }
 
 #target-circle {
-    background-color: gray;
+    background-color: #ea234b;
 }
 
 #moving-circle {
-    background-color: red;
+    background-color: #00c1d5;
 }
 
 #image-container {

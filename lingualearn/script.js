@@ -8,36 +8,25 @@ let isListening = false;
 let currentWordIndex = -1;
 let initX = -25;
 let initY = 0;
-let minX = 0;
-let maxX = -60;
-let minY = 0;
-let maxY = -60;
+let minX = -25;
+let maxX = -55;
+let minY = 20;
+let maxY = -55;
 let markerRadius = 10; // copied from style.css
 let plotWidth = 800; // copied from style.css
-let plotHeight = 350; // copied from style.css
+let plotHeight = 100; // copied from style.css
 
 // Words
-/*const words = [
-    { word: "beet", position: { x: 50, y: 50 } }, 
-    { word: "bit", position: { x: 200, y: 100 } }, 
-    { word: "boot", position: { x: 750, y: 50 } },
-    { word: "book", position: { x: 550, y: 100 } },
-    { word: "but", position: { x: 450, y: 150 } },
-    { word: "bet", position: { x: 250, y: 200 } },
-    { word: "bought", position: { x: 750, y: 200 } }, 
-    { word: "bat", position: { x: 300, y: 250 } },
-    { word: "bot", position: { x: 350, y: 300 } } 
-];*/
 const words = [
-    { word: "beet", position: { x: 650, y: 0 } }, 
-    { word: "boot", position: { x: 500, y: 300 } },
-    { word: "bit", position: { x: 600, y: 0 } }, 
-    { word: "book", position: { x: 650, y: 350 } },
-    { word: "but", position: { x: 700, y: 300 } },
-    { word: "bet", position: { x: 600, y: 0 } },
-    { word: "bought", position: { x: 700, y: 300 } }, 
-    { word: "bat", position: { x: 700, y: 300 } },
-    { word: "bot", position: { x: 700, y: 300 } } 
+    { word: "beet", format: "b<span class='highlighted'>ee</span>t", position: { x: 650, y: 0 } }, 
+    { word: "boot", format: "b<span class='highlighted'>oo</span>t", position: { x: 500, y: 300 } },
+    { word: "bit", format: "b<span class='highlighted'>i</span>t", position: { x: 600, y: 0 } }, 
+    { word: "book", format: "b<span class='highlighted'>oo</span>k", position: { x: 650, y: 350 } },
+    { word: "but", format: "b<span class='highlighted'>u</span>t", position: { x: 700, y: 300 } },
+    { word: "bet", format: "b<span class='highlighted'>e</span>t", position: { x: 600, y: 0 } },
+    { word: "bought", format: "b<span class='highlighted'>ough</span>t", position: { x: 700, y: 300 } }, 
+    { word: "bat", format: "b<span class='highlighted'>a</span>t", position: { x: 700, y: 300 } },
+    { word: "bot", format: "b<span class='highlighted'>o</span>t", position: { x: 700, y: 300 } } 
 ];
 
 // Function to initialize audio processing
@@ -114,6 +103,8 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
 // Function to update the marker position
 function updateMarkerPosition(features) {
     // Normalize x and y values to fit within the plot area
+    //console.log("features.x: ", features.x)
+    //console.log("features.y: ", features.y)
     let normalizedX = normalizeValue(features.x, minX, maxX, 0, plotWidth);
     let normalizedY = normalizeValue(features.y, minY, maxY, 0, plotHeight);
     //console.log("normalizedX: ", normalizedX)
@@ -121,14 +112,15 @@ function updateMarkerPosition(features) {
 
     // Update marker position
     let marker = document.getElementById('moving-circle');
-    marker.style.left = normalizedX + 'px';
-    marker.style.top = normalizedY + 'px';
-/*
+    marker.style.left = (normalizedX - plotWidth / 4) + 'px';
+    marker.style.top = (normalizedY - plotHeight / 4) + 'px';
+    //marker.style.left = normalizedX + 'px';
+    //marker.style.top = normalizedY + 'px';
+
      // Update stretching image size based on marker position
      let stretchableImage = document.getElementById('word-image-stretch');
      stretchableImage.style.width = calculateWidthBasedOnMarker(features.x, plotWidth);
      stretchableImage.style.height = calculateHeightBasedOnMarker(features.y, plotHeight);
-*/
 }
 
  function calculateWidthBasedOnMarker(markerX, plotWidth) {
@@ -217,14 +209,14 @@ function displayNextWord() {
     currentWordIndex = (currentWordIndex + 1) % words.length;
     //let currentWordIndex = Math.floor(Math.random() * words.length);
     let word = words[currentWordIndex].word;
-    document.getElementById('word-display').textContent = word;
+    let formattedWord = words[currentWordIndex].format;
+    document.getElementById('word-display').innerHTML = formattedWord;
     
     // Update the image source
     let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
     let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     fixedImage.src = stretchableImage.src = 'assets/pictures/' + word + '.png'; // Set the source of the image
-    console.log('fixedImage.src: ', fixedImage.src);
 
     // Ensure both images start with the same size
     fixedImage.style.width = stretchableImage.style.width = '50%';
