@@ -5,7 +5,7 @@ let audioContext;
 let analyser;
 let microphone;
 let isListening = false;
-let currentWordIndex = 0;
+let currentWordIndex = -1;
 let initX = -25;
 let initY = 0;
 let minX = 0;
@@ -19,8 +19,8 @@ let plotHeight = 350; // copied from style.css
 // Words
 /*const words = [
     { word: "beet", position: { x: 50, y: 50 } }, 
-    { word: "boot", position: { x: 750, y: 50 } },
     { word: "bit", position: { x: 200, y: 100 } }, 
+    { word: "boot", position: { x: 750, y: 50 } },
     { word: "book", position: { x: 550, y: 100 } },
     { word: "but", position: { x: 450, y: 150 } },
     { word: "bet", position: { x: 250, y: 200 } },
@@ -63,7 +63,6 @@ function processAudio() {
         if (!isListening) return; // Stop processing if not listening
         requestAnimationFrame(process);
         analyser.getFloatFrequencyData(dataArray);
-        //analyser.getByteFrequencyData(dataArray);
 
         const features = extractFeatures(dataArray);
         updateMarkerPosition(features);
@@ -106,7 +105,7 @@ function initializePlot(target_x, target_y, marker_x, marker_y) {
     addAxisLabels();
 
     let targetCircle = createCircle('target-circle', 'circle', { x: target_x, y: target_y });
-    let redMarker = createCircle('red-marker', 'circle marker', { x: marker_x, y: marker_y });
+    let redMarker = createCircle('moving-circle', 'circle marker', { x: marker_x, y: marker_y });
 
     plotArea.appendChild(targetCircle);
     plotArea.appendChild(redMarker);
@@ -121,14 +120,33 @@ function updateMarkerPosition(features) {
     //console.log("normalizedY: ", normalizedY)
 
     // Update marker position
-    let marker = document.getElementById('red-marker');
+    let marker = document.getElementById('moving-circle');
     marker.style.left = normalizedX + 'px';
     marker.style.top = normalizedY + 'px';
-
+/*
      // Update stretching image size based on marker position
-     let wordStretchImage = document.getElementById('word-image-stretch');
-     wordStretchImage.style.width = (plotWidth * 0.5 + features.x) + 'px'; // Stretch horizontally
-     wordStretchImage.style.height = (plotHeight * 0.5 + features.y) + 'px'; // Stretch vertically  
+     let stretchableImage = document.getElementById('word-image-stretch');
+     stretchableImage.style.width = calculateWidthBasedOnMarker(features.x, plotWidth);
+     stretchableImage.style.height = calculateHeightBasedOnMarker(features.y, plotHeight);
+*/
+}
+
+ function calculateWidthBasedOnMarker(markerX, plotWidth) {
+    // Assuming markerX varies from 0 to plotWidth
+    // Initial width is 50% of plotWidth, adjust according to your setup
+    let initialWidth = plotWidth / 2; 
+    let stretchFactor = markerX / plotWidth; // Calculate the stretch factor based on marker position
+
+    return initialWidth + (plotWidth - initialWidth) * stretchFactor + 'px';
+}
+
+function calculateHeightBasedOnMarker(markerY, plotHeight) {
+    // Assuming markerY varies from 0 to plotHeight
+    // Initial height is full height of the container, adjust according to your setup
+    let initialHeight = plotHeight; 
+    let stretchFactor = markerY / plotHeight; // Calculate the stretch factor based on marker position
+
+    return initialHeight * stretchFactor + 'px';
 }
 
 function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
@@ -143,7 +161,7 @@ function calculateDistance(pos1, pos2) {
 
 // Modify the checkProximity function to include pausing and message display
 function checkProximity() {
-    let marker = document.getElementById('red-marker');
+    let marker = document.getElementById('moving-circle');
     let target = document.getElementById('target-circle');
     let markerPos = { x: parseInt(marker.style.left, 10), y: parseInt(marker.style.top, 10) };
     let targetPos = { x: parseInt(target.style.left, 10), y: parseInt(target.style.top, 10) };
@@ -202,18 +220,15 @@ function displayNextWord() {
     document.getElementById('word-display').textContent = word;
     
     // Update the image source
-    let wordFixedImage = document.getElementById('word-image-fixed');
-    let wordStretchImage = document.getElementById('word-image-stretch');
-    wordFixedImage.src = wordStretchImage.src = 'assets/pictures/' + word + '.png'; // Set image source
-    wordFixedImage.style.display = wordStretchImage.style.display = 'block';
+    let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
+    let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
+    fixedImage.style.display = 'block'; // Set the display property to make it visible
+    fixedImage.src = stretchableImage.src = 'assets/pictures/' + word + '.png'; // Set the source of the image
+    console.log('fixedImage.src: ', fixedImage.src);
 
-    // Set initial size of the fixed image
-    wordFixedImage.style.maxWidth = '50%'; // 50% of the container width
-    wordFixedImage.style.maxHeight = '50%'; // 50% of the container height
-
-    // Initial size of the stretching image
-    wordStretchImage.style.width = '50%'; // 50% of the container width
-    wordStretchImage.style.height = '50%'; // 50% of the container height
+    // Ensure both images start with the same size
+    fixedImage.style.width = stretchableImage.style.width = '50%';
+    fixedImage.style.height = stretchableImage.style.height = '100%';
     
     return words[currentWordIndex].position; // Return the position of the new word
 }
@@ -276,7 +291,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('start-button-img').addEventListener('click', () => {
         if (!isListening) {
             initAudio();
-            document.getElementById('start-button-img').style.display = 'none';
+            let startButtonImg = document.getElementById('start-button-img');
+            startButtonImg.style.visibility = 'hidden';
+            startButtonImg.style.opacity = '0';
         }
     });
 });

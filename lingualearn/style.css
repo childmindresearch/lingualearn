@@ -1,8 +1,28 @@
 /* style.css */
 
 #header {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
+    padding: 10px;
+}
+
+#logo {
+    top: 15px; 
+    height: 60px;
+}
+
+h1 {
+    justify-self: center;
+    margin: 0;
+}
+
+#start-button-img {
+    cursor: pointer; /* image behaves like a clickable button */
+    height: 40px;
+    visibility: visible; /* Default state */
+    opacity: 1; /* Default state */
+    transition: opacity 0.5s; /* Smooth transition for hiding */
 }
 
 body {
@@ -11,35 +31,10 @@ body {
     background-color: #f0f0f0;
 }
 
-#logo {
-    top: 15px; 
-    left: 10px;  
-    height: 60px;
-}
-
-#header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 0 auto;
-    width: 800px;
-    padding: 20px;
-}
-
 #app {
     margin: 0 auto;
     width: 800px;
     padding: 40px;
-}
-
-h1 {
-    margin: 0 20px; /* Add margin around the h1 for spacing */
-}
-
-#start-button-img {
-    cursor: pointer; /* Makes the image behave like a clickable button */
-    margin-left: 20px;
-    height: 40px;
 }
 
 #plot-area {
@@ -91,13 +86,15 @@ h1 {
     background-color: gray;
 }
 
-#red-marker {
+#moving-circle {
     background-color: red;
 }
 
 #image-container {
     text-align: center; 
-    margin-top: 20px; 
+    margin-top: 20px;
+    position: relative; /* Ensure container is relative for absolute children */
+    height: 175px; /* Half of plot-area height, adjust as needed */
 }
 
 #word-image-fixed, #word-image-stretch {
@@ -105,6 +102,8 @@ h1 {
     left: 50%;
     transform: translateX(-50%);
     bottom: 10px;
+    width: 50%; /* Start with half of container width */
+    height: 100%; /* Full height of container */
 }
 
 #word-image-fixed {
