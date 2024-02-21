@@ -6,19 +6,16 @@
     align-items: center;
     padding: 10px;
 }
-
 #logo {
     top: 0px; 
     height: 36px;
 }
-
 h1 {
     font-size: 20px;
     color: #0067a0;
     justify-self: right;
     margin-right: 2px;
 }
-
 #start-button-img {
     cursor: pointer; /* image behaves like a clickable button */
     height: 30px;
@@ -29,17 +26,27 @@ h1 {
     margin-left: 10px;
 }
 
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
     background-color: #f0f0f0;
 }
-
 #app {
     margin: 0 auto;
     width: 800px;
     padding: 0px;
 }
+
+
+#word-display {
+    font-size: 80px;
+    margin-bottom: 10px;
+}
+.highlighted {
+    color: #ea234b;
+}
+
 
 #plot-area {
     width: 800px;
@@ -48,40 +55,25 @@ body {
     position: relative;
     margin-bottom: 0px;
 }
-
 .grid-line {
     position: absolute;
     background-color: #c8c8c8; /* Grid line color */
 }
-
 .vertical {
     width: 1px; /* Vertical line thickness */
     height: 100%; /* Full height of the plot area */
 }
-
 .horizontal {
     height: 1px; /* Horizontal line thickness */
     width: 100%; /* Full width of the plot area */
 }
-
 .axis-label {
     position: absolute;
-    color: #000; /* Label text color */
+    font-size: 12px;
+    color: slategray; /* Label text color */
     padding: 4px;
 }
 
-#word-display {
-    font-size: 80px;
-    margin-bottom: 0px;
-}
-
-.highlighted {
-    color: #ea234b;
-}
-
-#start-button {
-    margin-top: 20px;
-}
 
 .circle {
     width: 15px;
@@ -89,35 +81,33 @@ body {
     border-radius: 50%;
     position: absolute;
 }
-
 #target-circle {
     background-color: #ea234b;
 }
-
 #moving-circle {
     background-color: #00c1d5;
 }
 
+
 #image-container {
     text-align: center; 
     margin-top: 20px;
-    position: relative; /* Ensure container is relative for absolute children */
-    height: 175px; /* Half of plot-area height, adjust as needed */
+    position: relative; /* Container is relative for absolute children */
+    height: 400px;
 }
-
 #word-image-fixed, #word-image-stretch {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     bottom: 10px;
-    width: 50%; /* Start with half of container width */
-    height: 100%; /* Full height of container */
+    width: 100%; /* Start with fraction of container width */
+    height: 100%; /* Start with fraction of container height*/
 }
-
 #word-image-fixed {
-    max-width: 50%;
+    max-width: 100%;
     max-height: 50%;
 }
+
 
 #confetti-container {
     position: fixed;
@@ -129,7 +119,6 @@ body {
     overflow: hidden;
     z-index: 9999;
 }
-
 .confetti {
     position: absolute;
     width: 10px;

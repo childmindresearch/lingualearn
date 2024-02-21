@@ -6,27 +6,27 @@ let analyser;
 let microphone;
 let isListening = false;
 let currentWordIndex = -1;
-let initX = -25;
-let initY = 0;
-let minX = -25;
-let maxX = -55;
-let minY = 20;
-let maxY = -55;
-let markerRadius = 10; // copied from style.css
+let markerRadius = 15; // copied from style.css
+let initX = -markerRadius;
+let initY = -markerRadius;
+let minX = -35;
+let maxX = -60;
+let minY = -5;
+let maxY = -60;
 let plotWidth = 800; // copied from style.css
 let plotHeight = 100; // copied from style.css
 
 // Words
 const words = [
-    { word: "beet", format: "b<span class='highlighted'>ee</span>t", position: { x: 650, y: 0 } }, 
-    { word: "boot", format: "b<span class='highlighted'>oo</span>t", position: { x: 500, y: 300 } },
-    { word: "bit", format: "b<span class='highlighted'>i</span>t", position: { x: 600, y: 0 } }, 
-    { word: "book", format: "b<span class='highlighted'>oo</span>k", position: { x: 650, y: 350 } },
-    { word: "but", format: "b<span class='highlighted'>u</span>t", position: { x: 700, y: 300 } },
-    { word: "bet", format: "b<span class='highlighted'>e</span>t", position: { x: 600, y: 0 } },
-    { word: "bought", format: "b<span class='highlighted'>ough</span>t", position: { x: 700, y: 300 } }, 
-    { word: "bat", format: "b<span class='highlighted'>a</span>t", position: { x: 700, y: 300 } },
-    { word: "bot", format: "b<span class='highlighted'>o</span>t", position: { x: 700, y: 300 } } 
+    { word: "bat", format: "b<span class='highlighted'>a</span>t", position: { x: 600, y: 100 } },
+    { word: "bot", format: "b<span class='highlighted'>o</span>t", position: { x: 600, y: 75 } },
+    { word: "boot", format: "b<span class='highlighted'>oo</span>t", position: { x: 400, y: 0 } },
+    { word: "book", format: "b<span class='highlighted'>oo</span>k", position: { x: 400, y: 100 } },
+    { word: "beet", format: "b<span class='highlighted'>ee</span>t", position: { x: 350, y: 0 } }, 
+    { word: "bit", format: "b<span class='highlighted'>i</span>t", position: { x: 350, y: 100 } }, 
+    { word: "but", format: "b<span class='highlighted'>u</span>t", position: { x: 600, y: 100 } },
+    { word: "bet", format: "b<span class='highlighted'>e</span>t", position: { x: 300, y: 100 } },
+    { word: "bought", format: "b<span class='highlighted'>ough</span>t", position: { x: 450, y: 75 } } 
 ];
 
 // Function to initialize audio processing
@@ -108,14 +108,12 @@ function updateMarkerPosition(features) {
     let normalizedX = normalizeValue(features.x, minX, maxX, 0, plotWidth);
     let normalizedY = normalizeValue(features.y, minY, maxY, 0, plotHeight);
     //console.log("normalizedX: ", normalizedX)
-    //console.log("normalizedY: ", normalizedY)
+    console.log("normalizedY: ", normalizedY)
 
     // Update marker position
     let marker = document.getElementById('moving-circle');
-    marker.style.left = (normalizedX - plotWidth / 4) + 'px';
-    marker.style.top = (normalizedY - plotHeight / 4) + 'px';
-    //marker.style.left = normalizedX + 'px';
-    //marker.style.top = normalizedY + 'px';
+    marker.style.left = normalizedX + 'px';
+    marker.style.top = normalizedY + 'px';
 
      // Update stretching image size based on marker position
      let stretchableImage = document.getElementById('word-image-stretch');
@@ -123,7 +121,12 @@ function updateMarkerPosition(features) {
      stretchableImage.style.height = calculateHeightBasedOnMarker(features.y, plotHeight);
 }
 
- function calculateWidthBasedOnMarker(markerX, plotWidth) {
+function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
+    // Normalize a value from one range to another
+    return ((value - minInput) / (maxInput - minInput)) * (maxOutput - minOutput) + minOutput;
+}
+
+function calculateWidthBasedOnMarker(markerX, plotWidth) {
     // Assuming markerX varies from 0 to plotWidth
     // Initial width is 50% of plotWidth, adjust according to your setup
     let initialWidth = plotWidth / 2; 
@@ -139,11 +142,6 @@ function calculateHeightBasedOnMarker(markerY, plotHeight) {
     let stretchFactor = markerY / plotHeight; // Calculate the stretch factor based on marker position
 
     return initialHeight * stretchFactor + 'px';
-}
-
-function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
-    // Normalize a value from one range to another
-    return ((value - minInput) / (maxInput - minInput)) * (maxOutput - minOutput) + minOutput;
 }
 
 // Define a function to calculate the distance between two points
