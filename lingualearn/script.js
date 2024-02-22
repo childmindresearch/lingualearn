@@ -15,6 +15,7 @@ let minY = -5;
 let maxY = -60;
 let plotWidth = 800; // copied from style.css
 let plotHeight = 100; // copied from style.css
+let imageSize = 400;
 
 // Words
 const words = [
@@ -70,6 +71,24 @@ function extractFeatures(dataArray) {
     return features
 }
 
+// Function to initialize the plot with target and marker
+function initializePlot(target_x, target_y, moving_x, moving_y) {
+    let plotArea = document.getElementById('plot-area');
+
+    // Clear existing elements in the plot area
+    while (plotArea.firstChild) {
+        plotArea.removeChild(plotArea.firstChild);
+    }
+    drawGrid();
+    addAxisLabels();
+
+    let targetCircle = createCircle('target-circle', 'target circle', { x: target_x, y: target_y });
+    let movingCircle = createCircle('moving-circle', 'moving circle', { x: moving_x, y: moving_y });
+
+    plotArea.appendChild(targetCircle);
+    plotArea.appendChild(movingCircle);
+}
+
 // Function to create a circle
 function createCircle(id, className, position) {
     let circle = document.createElement('div');
@@ -82,22 +101,25 @@ function createCircle(id, className, position) {
     return circle;
 }
 
-// Function to initialize the plot with target and marker
-function initializePlot(target_x, target_y, marker_x, marker_y) {
-    let plotArea = document.getElementById('plot-area');
+// Function to display the next word
+function displayNextWord() {
+    currentWordIndex = (currentWordIndex + 1) % words.length;
+    //let currentWordIndex = Math.floor(Math.random() * words.length);
+    let word = words[currentWordIndex].word;
+    let formattedWord = words[currentWordIndex].format;
+    document.getElementById('word-display').innerHTML = formattedWord;
+    
+    // Update the image source
+    let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
+    let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
+    fixedImage.style.display = 'block'; // Set the display property to make it visible
+    stretchableImage.style.display = 'block'; // Set the display property to make it visible
+    fixedImage.src = stretchableImage.src = 'assets/pictures/' + word + '.png'; // Set the source of the image
 
-    // Clear existing elements in the plot area
-    while (plotArea.firstChild) {
-        plotArea.removeChild(plotArea.firstChild);
-    }
-    drawGrid();
-    addAxisLabels();
-
-    let targetCircle = createCircle('target-circle', 'circle', { x: target_x, y: target_y });
-    let redMarker = createCircle('moving-circle', 'circle marker', { x: marker_x, y: marker_y });
-
-    plotArea.appendChild(targetCircle);
-    plotArea.appendChild(redMarker);
+    // Ensure both images start with the same size
+    fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
+    fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
+    return words[currentWordIndex].position; // Return the position of the new word
 }
 
 // Function to update the marker position
@@ -108,47 +130,50 @@ function updateMarkerPosition(features) {
     let normalizedX = normalizeValue(features.x, minX, maxX, 0, plotWidth);
     let normalizedY = normalizeValue(features.y, minY, maxY, 0, plotHeight);
     //console.log("normalizedX: ", normalizedX)
-    console.log("normalizedY: ", normalizedY)
+    //console.log("normalizedY: ", normalizedY)
 
     // Update marker position
     let marker = document.getElementById('moving-circle');
     marker.style.left = normalizedX + 'px';
     marker.style.top = normalizedY + 'px';
 
-     // Update stretching image size based on marker position
-     let stretchableImage = document.getElementById('word-image-stretch');
-     stretchableImage.style.width = calculateWidthBasedOnMarker(features.x, plotWidth);
-     stretchableImage.style.height = calculateHeightBasedOnMarker(features.y, plotHeight);
-}
+    // Get target position
+    let target = document.getElementById('target-circle');
+    let targetX = parseInt(target.style.left, 10);
+    let targetY = parseInt(target.style.top, 10);
 
+    // Update stretching image size based on marker position
+    let stretchableImage = document.getElementById('word-image-stretch');
+    stretchableImage.style.width = calculateImageWidth(normalizedX, targetX, imageSize, plotWidth) + 'px';
+    stretchableImage.style.height = calculateImageHeight(normalizedY, targetY, imageSize, plotHeight) + 'px';
+}
 function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
     // Normalize a value from one range to another
     return ((value - minInput) / (maxInput - minInput)) * (maxOutput - minOutput) + minOutput;
 }
 
-function calculateWidthBasedOnMarker(markerX, plotWidth) {
-    // Assuming markerX varies from 0 to plotWidth
-    // Initial width is 50% of plotWidth, adjust according to your setup
-    let initialWidth = plotWidth / 2; 
-    let stretchFactor = markerX / plotWidth; // Calculate the stretch factor based on marker position
+function calculateImageWidth(markerX, targetX, plotWidth) {
+    let deltaX = markerX - targetX;
+    let initialWidth = imageSize;
+    let stretchFactor = Math.abs(deltaX) / (plotWidth / 2); // Factor by which to stretch
 
-    return initialWidth + (plotWidth - initialWidth) * stretchFactor + 'px';
+    // Expand or contract based on marker position relative to target
+    return deltaX > 0 ? initialWidth * (1 + stretchFactor) : initialWidth * (1 - stretchFactor);
 }
 
-function calculateHeightBasedOnMarker(markerY, plotHeight) {
-    // Assuming markerY varies from 0 to plotHeight
-    // Initial height is full height of the container, adjust according to your setup
-    let initialHeight = plotHeight; 
-    let stretchFactor = markerY / plotHeight; // Calculate the stretch factor based on marker position
+function calculateImageHeight(markerY, targetY, plotHeight) {
+    let deltaY = markerY - targetY;
+    let initialHeight = imageSize;
+    let stretchFactor = Math.abs(deltaY) / (plotHeight / 2); // Factor by which to stretch
 
-    return initialHeight * stretchFactor + 'px';
+    // Expand or contract based on marker position relative to target
+    return deltaY > 0 ? initialHeight * (1 + stretchFactor) : initialHeight * (1 - stretchFactor);
 }
 
 // Define a function to calculate the distance between two points
 function calculateDistance(pos1, pos2) {
     return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
 }
-
 // Modify the checkProximity function to include pausing and message display
 function checkProximity() {
     let marker = document.getElementById('moving-circle');
@@ -157,7 +182,6 @@ function checkProximity() {
     let targetPos = { x: parseInt(target.style.left, 10), y: parseInt(target.style.top, 10) };
     let distance = calculateDistance(markerPos, targetPos);
     let proximityRadius = 20; // Radius
-
     if (distance <= proximityRadius) {
         celebrateSuccess();
     }
@@ -174,7 +198,6 @@ function celebrateSuccess() {
         processAudio();
     }, 1000); // Delay in ms
 }
-
 // Function to display a celebratory message
 function displayCelebratoryMessage() {
     // Play a sound
@@ -200,33 +223,12 @@ function displayCelebratoryMessage() {
      setTimeout(() => {
          confettiContainer.remove();
      }, 3000);
- }
-
-// Function to display the next word
-function displayNextWord() {
-    currentWordIndex = (currentWordIndex + 1) % words.length;
-    //let currentWordIndex = Math.floor(Math.random() * words.length);
-    let word = words[currentWordIndex].word;
-    let formattedWord = words[currentWordIndex].format;
-    document.getElementById('word-display').innerHTML = formattedWord;
-    
-    // Update the image source
-    let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
-    let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
-    fixedImage.style.display = 'block'; // Set the display property to make it visible
-    fixedImage.src = stretchableImage.src = 'assets/pictures/' + word + '.png'; // Set the source of the image
-
-    // Ensure both images start with the same size
-    fixedImage.style.width = stretchableImage.style.width = '50%';
-    fixedImage.style.height = stretchableImage.style.height = '100%';
-    
-    return words[currentWordIndex].position; // Return the position of the new word
 }
 
 // Function to draw a grid
 function drawGrid() {
     let plotArea = document.getElementById('plot-area');
-    let numberOfVerticalLines = 16;
+    let numberOfVerticalLines = 32;
     let numberOfHorizontalLines = 7;
     let xSpacing = plotWidth / numberOfVerticalLines;
     let ySpacing = plotHeight / numberOfHorizontalLines;
