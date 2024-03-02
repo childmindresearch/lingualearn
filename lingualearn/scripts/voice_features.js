@@ -1,10 +1,40 @@
-// features.js
+// voice_features.js
+// Script to extract features from voice data.
+
 // First Formant (F1): 
 //     This usually lies in the range of 300 to 800 Hz. 
 //     It is associated with vowel height (openness).
 // Second Formant (F2): 
 //     This typically ranges from 800 to 2200 Hz. 
 //     It is related to vowel backness (front vs. back).
+
+/*
+const FormantAnalyzer = require('formantanalyzer'); //after npm installation
+FormantAnalyzer.configure(launch_config);
+FormantAnalyzer.LaunchAudioNodes(2, webAudioElement, call_backed_function, ['file_label'], false, false);
+function Configure_FormantAnalyzer() {
+    const BOX_HEIGHT = 300;
+    const BOX_WIDTH = window.screen.availWidth - 50;
+    document.getElementById('SpectrumCanvas').width = BOX_WIDTH;    //reset the size of canvas element
+    document.getElementById('SpectrumCanvas').height = BOX_HEIGHT;
+    
+    let launch_config = { plot_enable: true,
+    spec_type: 1,    //see below
+    output_level: 2, //see below
+    plot_len: 200, f_min: 50, f_max: 4000,
+    N_fft_bins: 256,
+    N_mel_bins: 128,
+    window_width: 25, window_step: 15,
+    pause_length: 200, min_seg_length: 50,
+    auto_noise_gate: true, voiced_min_dB: 10, voiced_max_dB: 100,
+    plot_lag: 1, pre_norm_gain: 1000, high_f_emph: 0.0,
+    plot_canvas: document.querySelector('#SpectrumCanvas').getContext('2d'),
+    canvas_width: BOX_WIDTH,
+    canvas_height: BOX_HEIGHT };
+
+    FormantAnalyzer.configure(launch_config);
+}
+*/
 
 function extractFormants(dataArray, sampleRate) {
     const fftSize = 2048; // Example size, can be adjusted

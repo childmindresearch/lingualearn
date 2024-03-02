@@ -1,4 +1,5 @@
-// script.js
+// stretch_image_with_formants.js
+// Script that uses F1 and F2 to move a marker in a plot and stretch an image.
 
 // Define global variables
 let audioContext;
@@ -15,12 +16,14 @@ let minY = -5;
 let maxY = -60;
 let plotWidth = 800; // copied from style.css
 let plotHeight = 100; // copied from style.css
+let numberOfVerticalLines = 8; //32;
+let numberOfHorizontalLines = 5; //7;
 let imageSize = 400;
 
 // Words
-const words = [
+/*const words = [
     { word: "bat", format: "b<span class='highlighted'>a</span>t", position: { x: 600, y: 100 } },
-    { word: "bot", format: "b<span class='highlighted'>o</span>t", position: { x: 600, y: 75 } },
+    { word: "bot", format: "b<span class='highlighted'>o</span>t", position: { x: 600, y: 100 } },
     { word: "boot", format: "b<span class='highlighted'>oo</span>t", position: { x: 400, y: 0 } },
     { word: "book", format: "b<span class='highlighted'>oo</span>k", position: { x: 400, y: 100 } },
     { word: "beet", format: "b<span class='highlighted'>ee</span>t", position: { x: 350, y: 0 } }, 
@@ -28,6 +31,10 @@ const words = [
     { word: "but", format: "b<span class='highlighted'>u</span>t", position: { x: 600, y: 100 } },
     { word: "bet", format: "b<span class='highlighted'>e</span>t", position: { x: 300, y: 100 } },
     { word: "bought", format: "b<span class='highlighted'>ough</span>t", position: { x: 450, y: 75 } } 
+];*/
+const words = [
+    { word: "bot", format: "b<span class='highlighted'>o</span>t", position: { x: 750, y: 100 } },
+    { word: "bat", format: "b<span class='highlighted'>a</span>t", position: { x: 600, y: 0 } }
 ];
 
 // Function to initialize audio processing
@@ -46,8 +53,6 @@ async function initAudio() {
 function processAudio() {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Float32Array(bufferLength);
-    //console.log(dataArray)
-
     //const dataArray = new Uint8Array(analyser.frequencyBinCount);
     const process = () => {
         if (!isListening) return; // Stop processing if not listening
@@ -118,6 +123,7 @@ function displayNextWord() {
 
     // Ensure both images start with the same size
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
+    //console.log('fixedImage.style.width', 'stretchableImage.style.width');
     fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
     return words[currentWordIndex].position; // Return the position of the new word
 }
@@ -155,19 +161,19 @@ function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
 function calculateImageWidth(markerX, targetX, plotWidth) {
     let deltaX = markerX - targetX;
     let initialWidth = imageSize;
-    let stretchFactor = Math.abs(deltaX) / (plotWidth / 2); // Factor by which to stretch
+    let stretchFactorX = Math.abs(deltaX) / (plotWidth / 2); // Factor by which to stretch
 
     // Expand or contract based on marker position relative to target
-    return deltaX > 0 ? initialWidth * (1 + stretchFactor) : initialWidth * (1 - stretchFactor);
+    return deltaX > 0 ? initialWidth * (1 + stretchFactorX) : initialWidth * (1 - stretchFactor);
 }
 
 function calculateImageHeight(markerY, targetY, plotHeight) {
     let deltaY = markerY - targetY;
     let initialHeight = imageSize;
-    let stretchFactor = Math.abs(deltaY) / (plotHeight / 2); // Factor by which to stretch
+    let stretchFactorY = Math.abs(deltaY) / (plotHeight / 2); // Factor by which to stretch
 
     // Expand or contract based on marker position relative to target
-    return deltaY > 0 ? initialHeight * (1 + stretchFactor) : initialHeight * (1 - stretchFactor);
+    return deltaY > 0 ? initialHeight * (1 + stretchFactorY) : initialHeight * (1 - stretchFactor);
 }
 
 // Define a function to calculate the distance between two points
@@ -228,8 +234,6 @@ function displayCelebratoryMessage() {
 // Function to draw a grid
 function drawGrid() {
     let plotArea = document.getElementById('plot-area');
-    let numberOfVerticalLines = 32;
-    let numberOfHorizontalLines = 7;
     let xSpacing = plotWidth / numberOfVerticalLines;
     let ySpacing = plotHeight / numberOfHorizontalLines;
 
