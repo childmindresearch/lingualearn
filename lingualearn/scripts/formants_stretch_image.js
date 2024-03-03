@@ -164,7 +164,7 @@ function calculateImageWidth(markerX, targetX, plotWidth) {
     let stretchFactorX = Math.abs(deltaX) / (plotWidth / 2); // Factor by which to stretch
 
     // Expand or contract based on marker position relative to target
-    return deltaX > 0 ? initialWidth * (1 + stretchFactorX) : initialWidth * (1 - stretchFactor);
+    return deltaX > 0 ? initialWidth * (1 + stretchFactorX) : initialWidth * (1 - stretchFactorX);
 }
 
 function calculateImageHeight(markerY, targetY, plotHeight) {
@@ -173,7 +173,7 @@ function calculateImageHeight(markerY, targetY, plotHeight) {
     let stretchFactorY = Math.abs(deltaY) / (plotHeight / 2); // Factor by which to stretch
 
     // Expand or contract based on marker position relative to target
-    return deltaY > 0 ? initialHeight * (1 + stretchFactorY) : initialHeight * (1 - stretchFactor);
+    return deltaY > 0 ? initialHeight * (1 + stretchFactorY) : initialHeight * (1 - stretchFactorY);
 }
 
 // Define a function to calculate the distance between two points

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- Website that moves a marker in a F1 x F2 plot. -->
+<!-- Website that uses F1 and F2 to move a marker in a plot and stretch an image. -->
 <!-- python -m http.server -->
 <!-- http://localhost:8000 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>LinguaLearn</title>
-    <link rel="stylesheet" href="css/stretch_image_with_formants.css"> <!-- Link to CSS file -->
+    <link rel="stylesheet" href="css/style.css"> <!-- Link to CSS file -->
 </head>
 <body>
     <div id="header">
@@ -20,9 +20,11 @@
         <div id="plot-area">
         </div>
         <div id="image-container">
+            <img id="word-image-fixed" src="" alt="Word Image Fixed">
+            <img id="word-image-stretch" src="" alt="Word Image Stretch">
         </div>
     </div>
     <script src="scripts/voice_features.js"></script>
-    <script src="scripts/move_marker_with_formants.js"></script>
+    <script src="scripts/formants_stretch_image.js"></script>
 </body>
 </html> 
