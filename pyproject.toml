@@ -1,21 +1,14 @@
 [tool.poetry]
-name = "lingualearn_words"
-version = "1.0"
-description = "Interactive vocabulary builder"
+name = "app-name"
+version = "0.1.0"
+description = "Description."
 authors = ["Arno Klein <binarybottle@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "lingualearn_words", from = "src"}]
+packages = [{include = "APP_NAME", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.12"
-g2p-en = "^2.1.0"
-gtts = "^2.5.1"
-sounddevice = "^0.4.6"
-soundfile = "^0.12.1"
-pyaudio = "^0.2.14"
-matplotlib = "^3.8.3"
-openai = "^1.14.1"
+python = "~3.11"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
@@ -90,6 +83,5 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.2.0"]
 build-backend = "poetry.core.masonry.api"
-
