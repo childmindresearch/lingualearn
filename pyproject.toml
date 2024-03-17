@@ -1,10 +1,11 @@
 [tool.poetry]
-name = "lingualearn-words"
+name = "lingualearn_words"
 version = "1.0"
 description = "Interactive vocabulary builder"
 authors = ["Arno Klein <binarybottle@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+packages = [{include = "lingualearn_words", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
