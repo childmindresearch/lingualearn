@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "lingualearn_words"
 version = "0.1.0"
-description = "Description."
+description = "Command-line tools for building vocabulary and improving verbal fluency."
 authors = ["Arno Klein <binarybottle@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "lingualearn_words", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "~3.11"
+python = "~3.12"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
@@ -58,7 +58,7 @@ exclude = [
 line-length = 88
 indent-width = 4
 src = ["src"]
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["ANN", "D", "E", "F", "I"]
