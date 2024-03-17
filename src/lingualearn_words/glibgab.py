@@ -82,4 +82,4 @@ fixed_madlib = fix_grammar(input_text=filled_madlib,
 print(fixed_madlib)
 
 png_file = generate_image(prompt=fixed_madlib, size='256x256', output_format='png', output_dir='tmp', verbose=verbose)
-display_image(png_file)
+#display_image(png_file)

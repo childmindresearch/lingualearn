@@ -10,7 +10,7 @@ import pickle
 import json
 from base64 import b64decode
 from pathlib import Path
-from PIL import Image
+#from PIL import Image
 
 #-----------------------------------------------------------------------------                                              
 # Functions                                                                                                
@@ -95,9 +95,9 @@ def json2png(json_file, output_dir="tmp"):
     return image_file
 
 
-def display_image(image_file):
-    '''
-    Display image.
-    '''
-    im = Image.open(image_file)
-    im.show()
+#def display_image(image_file):
+#    '''
+#    Display image.
+#    '''
+#    im = Image.open(image_file)
+#    im.show()
