@@ -535,55 +535,55 @@ def say_word_in_a_sentence(word, duration=3, output_audio="tmp/output.wav",
 #-----------------------------------------------------------------------------                                              
 if do_select_sound:
     if verbose:
-        display_header('Listen, then select matching text: select_text_to_match_spoken_text()')
+        display_header('Listen, then select matching text')
     if not do_input_text:
         input_text = 'pair'
     select_text_to_match_spoken_text(input_text, nchoices, ntries, 25, None)
 if do_type_sound:
     if verbose:
-        display_header('Listen, then type matching text: type_text_to_match_spoken_text()')
+        display_header('Listen, then type matching text')
     if not do_input_text:
         input_text = 'pair'
     type_text_to_match_spoken_text(input_text, 25, ntries)
 if do_imitate_sound:
     if verbose:
-        display_header('Imitate sounds: imitate_spoken_text()')
+        display_header('Imitate sounds')
     if not do_input_text:
         input_text = 'bicycle'
     imitate_spoken_text(input_text, duration1, output_audio, ntries)
 if do_match_definition:
     if verbose:
-        display_header('Type a word that matches a definition: type_word_to_match_context(): definition')
+        display_header('Type a word that matches a definition')
     if not do_input_text:
         input_text = 'balloon'
     type_word_to_match_context(input_text, 'definition', ntries)
 if do_match_synonym:
     if verbose:
-        display_header('Type a word that matches synonyms: type_word_to_match_context(): synonym')
+        display_header('Type a word that matches synonyms')
     if not do_input_text:
         input_text = 'thin'
     type_word_to_match_context(input_text, 'synonym', ntries)
 if do_match_antonym:
     if verbose:
-        display_header('Type a word that matches antonyms: type_word_to_match_context(): antonym')
+        display_header('Type a word that matches antonyms')
     if not do_input_text:
         input_text = 'deep'
     type_word_to_match_context(input_text, 'antonym', ntries)
 if do_match_jeopardy:
     if verbose:
-        display_header('Type a word that matches a Jeopardy! question: type_word_to_match_context(): jeopardy')
+        display_header('Type a word that matches a Jeopardy! question')
     if not do_input_text:
         input_text = 'six'
     type_word_to_match_context(input_text, 'jeopardy', ntries)
 if do_type_sentence:
     if verbose:
-        display_header('Use a word in a typed sentence: type_word_in_a_sentence()')
+        display_header('Use a word in a typed sentence')
     if not do_input_text:
         input_text = 'beetle'
     type_word_in_a_sentence(input_text, ntries)
 if do_use_word:
     if verbose:
-        display_header('Use a word in a spoken sentence: say_word_in_a_sentence()')
+        display_header('Use a word in a spoken sentence')
     if not do_input_text:
         input_text = 'butterfly'
     say_word_in_a_sentence(input_text, duration2, output_audio, ntries)

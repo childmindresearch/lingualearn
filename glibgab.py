@@ -48,7 +48,7 @@ if quiet:
 from generate_text_images import generate_description, generate_madlib
 from generate_text_images import fill_madlib, fix_grammar
 from generate_text_images import generate_image
-from io_files import display_image
+#from io_files import display_image
 
 #-----------------------------------------------------------------------------                                              
 # Demo                                                                                                  

@@ -9,6 +9,7 @@ from gtts import gTTS
 import os
 import sounddevice as sd
 import soundfile as sf
+import speech_recognition as sr
 
 import pyaudio as pa 
 import matplotlib.pyplot as plt 

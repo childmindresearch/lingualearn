@@ -7,7 +7,7 @@ Copyright 2021-2023, Arno Klein, MIT License
 '''
 import re
 from itertools import permutations
-from g2p_en import G2p  # pip install g2p_en
+from g2p_en import G2p
 word_to_phonemes = G2p()
 from io_files import load_object
 
@@ -830,7 +830,7 @@ def generate_homophones(phonemes, max_count=26, max_phonemes_per_word=25,
 
     if words_starts_stops:
         if verbose:
-            print('Words: {0}'.format(', '.join([x[0] for x in words_starts_stops])), end='\n')
+            print('Words: {0}'.format(', '.join([x[0] for x in words_starts_stops]))) #, end='\n')
     
         words_starts_stops = flatten_to_sublists_of_strings(words_starts_stops) 
 

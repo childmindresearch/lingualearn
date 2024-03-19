@@ -6,7 +6,9 @@ Copyright 2023, Arno Klein, MIT License
 
 '''
 import os
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 import json
 from pathlib import Path
 from io_files import json2png
@@ -14,12 +16,7 @@ from io_files import json2png
 #-----------------------------------------------------------------------------                                              
 # Load GPT                                                                                     
 #-----------------------------------------------------------------------------                                              
-gpt_model = "gpt-4"  #"gpt-3.5-turbo" #"text-davinci-003"
-if gpt_model == "gpt-4":
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-elif gpt_model == "gpt-3.5-turbo":  #"text-davinci-003"
-    openai.api_key = os.getenv("OPENAI3_API_KEY")
-
+gpt_model = "gpt-4"
 
 #-----------------------------------------------------------------------------                                              
 # Functions                                                                                                  
@@ -27,7 +24,7 @@ elif gpt_model == "gpt-3.5-turbo":  #"text-davinci-003"
 
 
 def get_gpt_response(prompt, model=gpt_model):
-    completion = openai.ChatCompletion.create(model=model, messages=[{"role": "user", "content": prompt}])
+    completion = client.chat.completions.create(model=model, messages=[{"role": "user", "content": prompt}])
     response = completion.choices[0].message.content
 
     return response
@@ -40,15 +37,13 @@ def call_dalle(prompt, size="256x256", output_format="png", output_dir="tmp", ve
     elif output_format == "png":
         response_format = "b64_json"
 
-    response = openai.Image.create(
-        prompt=prompt,
-        n=1,
-        size=size,
-        response_format=response_format
-    )
+    response = client.images.generate(prompt=prompt,
+    n=1,
+    size=size,
+    response_format=response_format)
 
     if output_format == "url":
-        url = response["data"][0]["url"]
+        url = response.data[0].url
         if verbose:
             print(url)
 
@@ -56,7 +51,7 @@ def call_dalle(prompt, size="256x256", output_format="png", output_dir="tmp", ve
 
     elif output_format == "png":
 
-        json_file = os.path.join(output_dir, f"{prompt[:5]}-{response['created']}.json")
+        json_file = os.path.join(output_dir, f"{prompt[:5]}-{response.created}.json")
         with open(json_file, mode="w", encoding="utf-8") as file:
             json.dump(response, file)
             #if verbose:
