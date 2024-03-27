@@ -5,6 +5,7 @@ description = "Command-line tools for building vocabulary and improving verbal f
 authors = ["Arno Klein <binarybottle@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "~3.12"
@@ -17,11 +18,6 @@ matplotlib = "^3.8.3"
 openai = "^1.14.1"
 speechrecognition = "^3.10.1"
 textstat = "^0.7.3"
-
-line-length = 88
-indent-width = 4
-target-version = "py312"
-
 
 [build-system]
 requires = ["poetry-core>=1.2.0"]
